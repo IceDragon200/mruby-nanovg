@@ -18,6 +18,7 @@ struct NVGtransform_ {
 typedef struct NVGtransform_ NVGtransform;
 
 struct mrb_data_type mrb_nvg_transform_type;
+mrb_value mrb_nvg_transform_value(mrb_state *mrb, float *xform);
 void mrb_nvg_transform_init(mrb_state *mrb, struct RClass *nvg_module);
 
 #endif

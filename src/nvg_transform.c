@@ -1,3 +1,4 @@
+#include <string.h>
 #include <mruby.h>
 #include <mruby/class.h>
 #include <mruby/data.h>
@@ -15,6 +16,16 @@ mrb_nvg_transform_free(mrb_state *mrb, void *ptr)
 }
 
 struct mrb_data_type mrb_nvg_transform_type = { "Nanovg::Transform", mrb_nvg_transform_free };
+
+mrb_value
+mrb_nvg_transform_value(mrb_state *mrb, float *xform)
+{
+  NVGtransform *t;
+  mrb_value transform = mrb_obj_new(mrb, mrb_nvg_transform_class, 0, NULL);
+  t = mrb_data_get_ptr(mrb, transform, &mrb_nvg_transform_type);
+  memcpy(&t->ary[0], xform, sizeof(float) * 6);
+  return transform;
+}
 
 static mrb_value
 transform_initialize(mrb_state *mrb, mrb_value self)
@@ -51,7 +62,7 @@ transform_get_ ## _name_(mrb_state *mrb, mrb_value self)                      \
 {                                                                             \
   NVGtransform *transform;                                                    \
   transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);           \
-  return mrb_float_value(mrb, (mrb_float)transform->_name_);                  \
+  return mrb_float_value(mrb, transform->_name_);                             \
 }
 
 #define ATTR_SET(_name_)                                                      \
@@ -162,12 +173,13 @@ transform_pre_multiply(mrb_state *mrb, mrb_value self)
 static mrb_value
 transform_inverse(mrb_state *mrb, mrb_value self)
 {
+  int res;
   NVGtransform *a;
   NVGtransform *transform;
   mrb_get_args(mrb, "d", &a, &mrb_nvg_transform_type);
   transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);
-  nvgTransformInverse(&transform->ary[0], &a->ary[0]);
-  return self;
+  res = nvgTransformInverse(&transform->ary[0], &a->ary[0]);
+  return mrb_fixnum_value(res);
 }
 
 void
