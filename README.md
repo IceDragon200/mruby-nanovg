@@ -35,15 +35,15 @@ GLEW
 To `test` this binding you'll need [mruby-glfw3](https://github.com/IceDragon200/mruby-glfw3).
 
 TODO:
-[ ] Bind
-  [ ] Nanovg::Context.text_glyph_positions
-  [ ] Nanovg::Context.text_break_lines
-  [x] everything else
-[ ] Tests
-  [x] Nanovg
-  [x] Nanovg::Color
-  [ ] Nanovg::Context
-  [ ] Nanovg::Paint
-  [ ] Nanovg::Transform
-[ ] Samples / Examples
-  [ ] Port original nanovg ogl2 example
+- [ ] Bind
+  - [ ] Nanovg::Context.text_glyph_positions
+  - [ ] Nanovg::Context.text_break_lines
+  - [x] everything else
+- [ ] Tests
+  - [x] Nanovg
+  - [x] Nanovg::Color
+  - [ ] Nanovg::Context
+  - [ ] Nanovg::Paint
+  - [ ] Nanovg::Transform
+- [ ] Samples / Examples
+  - [ ] Port original nanovg ogl2 example
