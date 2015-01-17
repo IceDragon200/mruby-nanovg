@@ -9,5 +9,5 @@ MRuby::Gem::Specification.new('mruby-nanovg') do |spec|
   spec.cc.include_paths << ["#{build.root}/src"]
   spec.cc.flags << '-Werror'
   # We'll need some kind of OpenGL implementation
-  add_dependency 'mruby-glfw3', :github => 'take-cheeze/mruby-glfw3'
+  add_dependency 'mruby-glfw3', :github => 'IceDragon200/mruby-glfw3'
 end

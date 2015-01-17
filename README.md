@@ -9,16 +9,12 @@ MRuby::Build.new do |conf|
   #toolchain :gcc
   toolchain :clang # I used clang for testing, you can use gcc
   conf.gembox 'default'
-  conf.gem github: 'take-cheeze/mruby-glfw3'   # its also a dependency so don't worry too much, (which should change later)
+  conf.gem github: 'IceDragon200/mruby-glfw3'
   conf.gem github: 'IceDragon200/mruby-nanovg'
   conf.gem github: 'take-cheeze/mruby-clang-plugin' # not required, just makes debugging nicer
 
   conf.cc do |cc|
     cc.include_paths << 'path/to/nanovg/src'
-  end
-
-  conf.cxx do |cxx|
-    cxx.flags << '-std=c++11' # required for mruby-glfw3 (until someone backports it to C)
   end
 
   conf.linker do |linker|
@@ -36,4 +32,18 @@ Requirements:
 GLEW
 ```
 
-To `test` this binding you'll need [mruby-glfw3](https://github.com/take-cheeze/mruby-glfw3).
+To `test` this binding you'll need [mruby-glfw3](https://github.com/IceDragon200/mruby-glfw3).
+
+TODO:
+[ ] Bind
+  [ ] Nanovg::Context.text_glyph_positions
+  [ ] Nanovg::Context.text_break_lines
+  [x] everything else
+[ ] Tests
+  [x] Nanovg
+  [x] Nanovg::Color
+  [ ] Nanovg::Context
+  [ ] Nanovg::Paint
+  [ ] Nanovg::Transform
+[ ] Samples / Examples
+  [ ] Port original nanovg ogl2 example
