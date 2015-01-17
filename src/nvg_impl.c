@@ -1,0 +1,6 @@
+// This will is simply here to get nanovg to build correctly into the gem...
+// Becaus the headers are a bag of spaghetti and static function defs...
+#include <GL/glew.h>
+#include <nanovg.h>
+#define NANOVG_GL2_IMPLEMENTATION // Use GL2 implementation.
+#include <nanovg_gl.h>
