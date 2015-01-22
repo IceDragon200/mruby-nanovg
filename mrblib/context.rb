@@ -65,5 +65,17 @@ module Nanovg
     rescue AbortFrame
       nil
     end
+
+    def path
+      begin_path
+      yield self
+      close_path
+    end
+
+    def spork
+      save
+      yield self
+      restore
+    end
   end
 end
