@@ -6,7 +6,7 @@
 #include <mruby/class.h>
 #include "nvg.h"
 
-struct mrb_data_type mrb_nvg_color_type;
+extern const struct mrb_data_type mrb_nvg_color_type;
 void mrb_nvg_color_init(mrb_state *mrb, struct RClass *nvg_module);
 mrb_value mrb_nvg_color_value(mrb_state *mrb, NVGcolor color);
 

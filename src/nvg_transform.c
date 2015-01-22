@@ -15,7 +15,7 @@ mrb_nvg_transform_free(mrb_state *mrb, void *ptr)
   }
 }
 
-struct mrb_data_type mrb_nvg_transform_type = { "Nanovg::Transform", mrb_nvg_transform_free };
+const struct mrb_data_type mrb_nvg_transform_type = { "NVGtransform", mrb_nvg_transform_free };
 
 mrb_value
 mrb_nvg_transform_value(mrb_state *mrb, float *xform)

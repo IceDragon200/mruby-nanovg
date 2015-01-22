@@ -212,7 +212,7 @@ mrb_nvg_context_free(mrb_state *mrb, void *ptr)
   }
 }
 
-struct mrb_data_type mrb_nvg_context_type = { "Nanovg::Context", mrb_nvg_context_free };
+const struct mrb_data_type mrb_nvg_context_type = { "NVGcontext", mrb_nvg_context_free };
 
 static inline NVGcontext*
 get_context(mrb_state *mrb, mrb_value self)

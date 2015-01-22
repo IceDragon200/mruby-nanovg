@@ -73,7 +73,7 @@ mrb_nvg_paint_free(mrb_state *mrb, void *ptr)
   }
 }
 
-struct mrb_data_type mrb_nvg_paint_type = { "Nanovg::Paint", mrb_nvg_paint_free };
+const struct mrb_data_type mrb_nvg_paint_type = { "NVGpaint", mrb_nvg_paint_free };
 
 mrb_value
 mrb_nvg_paint_value(mrb_state *mrb, NVGpaint paint)

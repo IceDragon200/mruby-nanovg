@@ -14,7 +14,7 @@ mrb_nvg_color_free(mrb_state *mrb, void *ptr)
   }
 }
 
-struct mrb_data_type mrb_nvg_color_type = { "Nanovg::Color", mrb_nvg_color_free };
+const struct mrb_data_type mrb_nvg_color_type = { "NVGcolor", mrb_nvg_color_free };
 
 mrb_value
 mrb_nvg_color_value(mrb_state *mrb, NVGcolor color)
