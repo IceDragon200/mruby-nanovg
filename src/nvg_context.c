@@ -80,7 +80,7 @@ DEFINE_FUNC_N2_HEAD(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_); \
   return mrb_fixnum_value(_func_name_(context, _p0_, _p1_)); \
 }
 
-#define DEFINE_FUNC_N3(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_) \
+#define DEFINE_FUNC_N3_HEAD(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_) \
 static mrb_value                                 \
 _mrb_name_(mrb_state *mrb, mrb_value self)       \
 {                                                \
@@ -89,9 +89,17 @@ _mrb_name_(mrb_state *mrb, mrb_value self)       \
   _p1_type_ _p1_;                                \
   _p2_type_ _p2_;                                \
   mrb_get_args(mrb, _fmt_, &_p0_, &_p1_, &_p2_); \
-  context = get_context(mrb, self);              \
+  context = get_context(mrb, self)
+
+#define DEFINE_FUNC_N3(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_) \
+DEFINE_FUNC_N3_HEAD(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_); \
   _func_name_(context, _p0_, _p1_, _p2_);        \
   return self;                                   \
+}
+
+#define DEFINE_FUNC_N3_f(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_) \
+DEFINE_FUNC_N3_HEAD(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_); \
+  return mrb_float_value(mrb, _func_name_(context, _p0_, _p1_, _p2_));        \
 }
 
 #define DEFINE_FUNC_N4_HEAD(_mrb_name_, _func_name_, _fmt_, _p0_type_, _p1_type_, _p2_type_, _p3_type_) \
@@ -173,13 +181,26 @@ _mrb_name_(mrb_state *mrb, mrb_value self)              \
   _p0_type_ _p0_mrb_;                                   \
   mrb_get_args(mrb, "d", &_p0_mrb_, _p0_mrb_datatype_); \
   context = get_context(mrb, self);                     \
-  _func_name_(context, _p0_nvg_);                        \
+  _func_name_(context, _p0_nvg_);                       \
   return self;                                          \
 }
 
 /* If a helper wasn't found here, you most likely have to write the function yourself */
 
 /* END OF CONTEXT MACROS */
+
+/* patched function */
+static inline float
+nvgText_mrb(NVGcontext *context, float x, float y, const char *string)
+{
+  return nvgText(context, x, y, string, NULL);
+}
+
+static inline void
+nvgTextBox_mrb(NVGcontext *context, float x, float y, float breakRowWidth, const char *string)
+{
+  nvgTextBox(context, x, y, breakRowWidth, string, NULL);
+}
 
 static struct RClass *mrb_nvg_context_class;
 
@@ -432,8 +453,9 @@ DEFINE_FUNC_N1(context_text_line_height, nvgTextLineHeight, "f", mrb_float);
 DEFINE_FUNC_N1(context_text_align, nvgTextAlign, "i", mrb_int);
 DEFINE_FUNC_N1(context_font_face_id, nvgFontFaceId, "i", mrb_int);
 DEFINE_FUNC_N1(context_font_face, nvgFontFace, "z", char*);
-DEFINE_FUNC_N4_f(context_text, nvgText, "ffzz", mrb_float, mrb_float, char*, char*);
-DEFINE_FUNC_N5(context_text_box, nvgTextBox, "fffzz", mrb_float, mrb_float, mrb_float, char*, char*);
+
+DEFINE_FUNC_N3_f(context_text, nvgText_mrb, "ffz", mrb_float, mrb_float, char*);
+DEFINE_FUNC_N4(context_text_box, nvgTextBox_mrb, "fffz", mrb_float, mrb_float, mrb_float, char*);
 
 static mrb_value
 context_text_bounds(mrb_state *mrb, mrb_value self)
@@ -442,11 +464,10 @@ context_text_bounds(mrb_state *mrb, mrb_value self)
   mrb_float x;
   mrb_float y;
   char *str;
-  char *end;
   NVGtransform *t;
-  mrb_get_args(mrb, "ffzzd", &x, &y, &str, &end, &t, &mrb_nvg_transform_type);
+  mrb_get_args(mrb, "ffzd", &x, &y, &str, &t, &mrb_nvg_transform_type);
   context = get_context(mrb, self);
-  return mrb_float_value(mrb, nvgTextBounds(context, x, y, str, end, &t->ary[0]));
+  return mrb_float_value(mrb, nvgTextBounds(context, x, y, str, NULL, &t->ary[0]));
 }
 
 static mrb_value
@@ -457,11 +478,10 @@ context_text_box_bounds(mrb_state *mrb, mrb_value self)
   mrb_float y;
   mrb_float brw;
   char *str;
-  char *end;
   NVGtransform *t;
-  mrb_get_args(mrb, "fffzzd", &x, &y, &brw, &str, &end, &t, &mrb_nvg_transform_type);
+  mrb_get_args(mrb, "fffzd", &x, &y, &brw, &str, &t, &mrb_nvg_transform_type);
   context = get_context(mrb, self);
-  nvgTextBoxBounds(context, x, y, brw, str, end, &t->ary[0]);
+  nvgTextBoxBounds(context, x, y, brw, str, NULL, &t->ary[0]);
   return self;
 }
 
@@ -578,10 +598,10 @@ mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
   mrb_define_method(mrb, mrb_nvg_context_class, "text_align",          context_text_align,          MRB_ARGS_REQ(1));
   mrb_define_method(mrb, mrb_nvg_context_class, "font_face_id",        context_font_face_id,        MRB_ARGS_REQ(1));
   mrb_define_method(mrb, mrb_nvg_context_class, "font_face",           context_font_face,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text",                context_text,                MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_box",            context_text_box,            MRB_ARGS_REQ(5));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_REQ(5));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, mrb_nvg_context_class, "text",                context_text,                MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, mrb_nvg_context_class, "text_box",            context_text_box,            MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, mrb_nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, mrb_nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_REQ(5));
 
   /*mrb_define_method(mrb, mrb_nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));*/
   mrb_define_method(mrb, mrb_nvg_context_class, "text_metrics",        context_text_metrics,        MRB_ARGS_NONE());
