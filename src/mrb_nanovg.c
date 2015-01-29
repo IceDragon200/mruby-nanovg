@@ -10,14 +10,6 @@
 #include "nvg_transform.h"
 #include "nvg_context.h"
 
-static mrb_value
-init(mrb_state *mrb, mrb_value klass)
-{
-  if (glewInit() != GLEW_OK) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "GLEW has failed to initialize.");
-  }
-  return mrb_nil_value();
-}
 
 static mrb_value
 deg_to_rad(mrb_state *mrb, mrb_value klass)
@@ -44,7 +36,6 @@ mrb_mruby_nanovg_gem_init(mrb_state* mrb)
   mrb_nvg_transform_init(mrb, nvg_module);
   mrb_nvg_context_init(mrb, nvg_module);
 
-  mrb_define_class_method(mrb, nvg_module, "init",       init,       MRB_ARGS_NONE());
   mrb_define_class_method(mrb, nvg_module, "deg_to_rad", deg_to_rad, MRB_ARGS_REQ(1));
   mrb_define_class_method(mrb, nvg_module, "rad_to_deg", rad_to_deg, MRB_ARGS_REQ(1));
 
