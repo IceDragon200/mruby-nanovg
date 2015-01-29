@@ -3,6 +3,8 @@
 #include <mruby/data.h>
 #include <mruby/numeric.h>
 #include <mruby/array.h>
+
+#include "nvg_private.h"
 #include "nvg_context.h"
 #include "nvg_color.h"
 #include "nvg_paint.h"
@@ -202,7 +204,7 @@ nvgTextBox_mrb(NVGcontext *context, float x, float y, float breakRowWidth, const
   nvgTextBox(context, x, y, breakRowWidth, string, NULL);
 }
 
-static struct RClass *mrb_nvg_context_class;
+static struct RClass *nvg_context_class;
 
 void
 mrb_nvg_context_free(mrb_state *mrb, void *ptr)
@@ -227,6 +229,9 @@ context_initialize(mrb_state *mrb, mrb_value self)
   NVGcontext *context;
   mrb_get_args(mrb, "i", &flags);
   context = nvgCreateGL2(flags);
+  if (!context) {
+    mrb_raise(mrb, E_NVG_ERROR, "Could not create Context.");
+  }
   DATA_PTR(self) = context;
   DATA_TYPE(self) = &mrb_nvg_context_type;
   return self;
@@ -533,77 +538,77 @@ context_text_break_lines(mrb_state *mrb, mrb_value self)
 void
 mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  mrb_nvg_context_class = mrb_define_class_under(mrb, nvg_module, "Context", mrb->object_class);
-  MRB_SET_INSTANCE_TT(mrb_nvg_context_class, MRB_TT_DATA);
+  nvg_context_class = mrb_define_class_under(mrb, nvg_module, "Context", mrb->object_class);
+  MRB_SET_INSTANCE_TT(nvg_context_class, MRB_TT_DATA);
 
-  mrb_define_method(mrb, mrb_nvg_context_class, "initialize",          context_initialize,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "begin_frame",         context_begin_frame,         MRB_ARGS_REQ(3));
-  mrb_define_method(mrb, mrb_nvg_context_class, "cancel_frame",        context_cancel_frame,        MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "end_frame",           context_end_frame,           MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "save",                context_save,                MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "restore",             context_restore,             MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "reset",               context_reset,               MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "stroke_color",        context_stroke_color,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "stroke_paint",        context_stroke_paint,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "fill_color",          context_fill_color,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "fill_paint",          context_fill_paint,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "miter_limit",         context_miter_limit,         MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "stroke_width",        context_stroke_width,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "line_cap",            context_line_cap,            MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "line_join",           context_line_join,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "global_alpha",        context_global_alpha,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "reset_transform",     context_reset_transform,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "transform",           context_transform,           MRB_ARGS_REQ(6));
-  mrb_define_method(mrb, mrb_nvg_context_class, "translate",           context_translate,           MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "rotate",              context_rotate,              MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "skew_x",              context_skew_x,              MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "skew_y",              context_skew_y,              MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "scale",               context_scale,               MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "current_transform",   context_current_transform,   MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "create_image",        context_create_image,        MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "create_image_mem",    context_create_image_mem,    MRB_ARGS_REQ(3));
-  mrb_define_method(mrb, mrb_nvg_context_class, "create_image_rgba",   context_create_image_rgba,   MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "update_image",        context_update_image,        MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "image_size",          context_image_size,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "delete_image",        context_delete_image,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "scissor",             context_scissor,             MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "intersect_scissor",   context_intersect_scissor,   MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "reset_scissor",       context_reset_scissor,       MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "linear_gradient",     context_linear_gradient,     MRB_ARGS_REQ(6));
-  mrb_define_method(mrb, mrb_nvg_context_class, "box_gradient",        context_box_gradient,        MRB_ARGS_REQ(8));
-  mrb_define_method(mrb, mrb_nvg_context_class, "radial_gradient",     context_radial_gradient,     MRB_ARGS_REQ(6));
-  mrb_define_method(mrb, mrb_nvg_context_class, "image_pattern",       context_image_pattern,       MRB_ARGS_REQ(7));
-  mrb_define_method(mrb, mrb_nvg_context_class, "begin_path",          context_begin_path,          MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "move_to",             context_move_to,             MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "line_to",             context_line_to,             MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "bezier_to",           context_bezier_to,           MRB_ARGS_REQ(6));
-  mrb_define_method(mrb, mrb_nvg_context_class, "quad_to",             context_quad_to,             MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "arc_to",              context_arc_to,              MRB_ARGS_REQ(5));
-  mrb_define_method(mrb, mrb_nvg_context_class, "close_path",          context_close_path,          MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "path_winding",        context_path_winding,        MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "arc",                 context_arc,                 MRB_ARGS_REQ(6));
-  mrb_define_method(mrb, mrb_nvg_context_class, "rect",                context_rect,                MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "rounded_rect",        context_rounded_rect,        MRB_ARGS_REQ(5));
-  mrb_define_method(mrb, mrb_nvg_context_class, "ellipse",             context_ellipse,             MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "circle",              context_circle,              MRB_ARGS_REQ(3));
-  mrb_define_method(mrb, mrb_nvg_context_class, "fill",                context_fill,                MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "stroke",              context_stroke,              MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_context_class, "create_font",         context_create_font,         MRB_ARGS_REQ(2));
-  mrb_define_method(mrb, mrb_nvg_context_class, "create_font_mem",     context_create_font_mem,     MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "find_font",           context_find_font,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "font_size",           context_font_size,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "font_blur",           context_font_blur,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_letter_spacing", context_text_letter_spacing, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_line_height",    context_text_line_height,    MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_align",          context_text_align,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "font_face_id",        context_font_face_id,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "font_face",           context_font_face,           MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text",                context_text,                MRB_ARGS_REQ(3));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_box",            context_text_box,            MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_REQ(5));
+  mrb_define_method(mrb, nvg_context_class, "initialize",          context_initialize,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "begin_frame",         context_begin_frame,         MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, nvg_context_class, "cancel_frame",        context_cancel_frame,        MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "end_frame",           context_end_frame,           MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "save",                context_save,                MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "restore",             context_restore,             MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "reset",               context_reset,               MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "stroke_color",        context_stroke_color,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "stroke_paint",        context_stroke_paint,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "fill_color",          context_fill_color,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "fill_paint",          context_fill_paint,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "miter_limit",         context_miter_limit,         MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "stroke_width",        context_stroke_width,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "line_cap",            context_line_cap,            MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "line_join",           context_line_join,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "global_alpha",        context_global_alpha,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "reset_transform",     context_reset_transform,     MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "transform",           context_transform,           MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, nvg_context_class, "translate",           context_translate,           MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "rotate",              context_rotate,              MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "skew_x",              context_skew_x,              MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "skew_y",              context_skew_y,              MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "scale",               context_scale,               MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "current_transform",   context_current_transform,   MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "create_image",        context_create_image,        MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "create_image_mem",    context_create_image_mem,    MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, nvg_context_class, "create_image_rgba",   context_create_image_rgba,   MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "update_image",        context_update_image,        MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "image_size",          context_image_size,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "delete_image",        context_delete_image,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "scissor",             context_scissor,             MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "intersect_scissor",   context_intersect_scissor,   MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "reset_scissor",       context_reset_scissor,       MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "linear_gradient",     context_linear_gradient,     MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, nvg_context_class, "box_gradient",        context_box_gradient,        MRB_ARGS_REQ(8));
+  mrb_define_method(mrb, nvg_context_class, "radial_gradient",     context_radial_gradient,     MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, nvg_context_class, "image_pattern",       context_image_pattern,       MRB_ARGS_REQ(7));
+  mrb_define_method(mrb, nvg_context_class, "begin_path",          context_begin_path,          MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "move_to",             context_move_to,             MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "line_to",             context_line_to,             MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "bezier_to",           context_bezier_to,           MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, nvg_context_class, "quad_to",             context_quad_to,             MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "arc_to",              context_arc_to,              MRB_ARGS_REQ(5));
+  mrb_define_method(mrb, nvg_context_class, "close_path",          context_close_path,          MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "path_winding",        context_path_winding,        MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "arc",                 context_arc,                 MRB_ARGS_REQ(6));
+  mrb_define_method(mrb, nvg_context_class, "rect",                context_rect,                MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "rounded_rect",        context_rounded_rect,        MRB_ARGS_REQ(5));
+  mrb_define_method(mrb, nvg_context_class, "ellipse",             context_ellipse,             MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "circle",              context_circle,              MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, nvg_context_class, "fill",                context_fill,                MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "stroke",              context_stroke,              MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "create_font",         context_create_font,         MRB_ARGS_REQ(2));
+  mrb_define_method(mrb, nvg_context_class, "create_font_mem",     context_create_font_mem,     MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "find_font",           context_find_font,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "font_size",           context_font_size,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "font_blur",           context_font_blur,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "text_letter_spacing", context_text_letter_spacing, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "text_line_height",    context_text_line_height,    MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "text_align",          context_text_align,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "font_face_id",        context_font_face_id,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "font_face",           context_font_face,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "text",                context_text,                MRB_ARGS_REQ(3));
+  mrb_define_method(mrb, nvg_context_class, "text_box",            context_text_box,            MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_REQ(4));
+  mrb_define_method(mrb, nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_REQ(5));
 
-  /*mrb_define_method(mrb, mrb_nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));*/
-  mrb_define_method(mrb, mrb_nvg_context_class, "text_metrics",        context_text_metrics,        MRB_ARGS_NONE());
-  /*mrb_define_method(mrb, mrb_nvg_context_class, "text_break_lines",    context_text_break_lines,    MRB_ARGS_REQ(5));*/
+  /*mrb_define_method(mrb, nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));*/
+  mrb_define_method(mrb, nvg_context_class, "text_metrics",        context_text_metrics,        MRB_ARGS_NONE());
+  /*mrb_define_method(mrb, nvg_context_class, "text_break_lines",    context_text_break_lines,    MRB_ARGS_REQ(5));*/
 }

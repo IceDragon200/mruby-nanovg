@@ -8,7 +8,7 @@
 #include "nvg_color.h"
 #include "nvg_transform.h"
 
-static struct RClass *mrb_nvg_paint_class;
+static struct RClass *nvg_paint_class;
 
 #define ATTR_GET_HEAD(_name_) \
 static mrb_value                                           \
@@ -79,7 +79,7 @@ mrb_value
 mrb_nvg_paint_value(mrb_state *mrb, NVGpaint paint)
 {
   NVGpaint *npaint;
-  mrb_value mrbpaint = mrb_obj_new(mrb, mrb_nvg_paint_class, 0, NULL);
+  mrb_value mrbpaint = mrb_obj_new(mrb, nvg_paint_class, 0, NULL);
   npaint = mrb_data_get_ptr(mrb, mrbpaint, &mrb_nvg_paint_type);
   *npaint = paint;
   return mrbpaint;
@@ -152,22 +152,22 @@ ATTR_SET_i(image);
 void
 mrb_nvg_paint_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  mrb_nvg_paint_class = mrb_define_class_under(mrb, nvg_module, "Paint", mrb->object_class);
-  MRB_SET_INSTANCE_TT(mrb_nvg_paint_class, MRB_TT_DATA);
+  nvg_paint_class = mrb_define_class_under(mrb, nvg_module, "Paint", mrb->object_class);
+  MRB_SET_INSTANCE_TT(nvg_paint_class, MRB_TT_DATA);
 
-  mrb_define_method(mrb, mrb_nvg_paint_class, "initialize",   paint_initialize,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "xform",        paint_get_xform,      MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "extent",       paint_get_extent,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "radius",       paint_get_radius,     MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "feather",      paint_get_feather,    MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "inner_color",  paint_get_innerColor, MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "outer_color",  paint_get_outerColor, MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "image",        paint_get_image,      MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_paint_class, "xform=",       paint_set_xform,      MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "extent=",      paint_set_extent,     MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "radius=",      paint_set_radius,     MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "feather=",     paint_set_feather,    MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "inner_color=", paint_set_innerColor, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "outer_color=", paint_set_outerColor, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_paint_class, "image=",       paint_set_image,      MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "initialize",   paint_initialize,     MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "xform",        paint_get_xform,      MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "extent",       paint_get_extent,     MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "radius",       paint_get_radius,     MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "feather",      paint_get_feather,    MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "inner_color",  paint_get_innerColor, MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "outer_color",  paint_get_outerColor, MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "image",        paint_get_image,      MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_paint_class, "xform=",       paint_set_xform,      MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "extent=",      paint_set_extent,     MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "radius=",      paint_set_radius,     MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "feather=",     paint_set_feather,    MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "inner_color=", paint_set_innerColor, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "outer_color=", paint_set_outerColor, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_paint_class, "image=",       paint_set_image,      MRB_ARGS_REQ(1));
 }

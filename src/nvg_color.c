@@ -4,7 +4,7 @@
 #include <mruby/numeric.h>
 #include "nvg_color.h"
 
-static struct RClass *mrb_nvg_color_class;
+static struct RClass *nvg_color_class;
 
 void
 mrb_nvg_color_free(mrb_state *mrb, void *ptr)
@@ -19,7 +19,7 @@ const struct mrb_data_type mrb_nvg_color_type = { "NVGcolor", mrb_nvg_color_free
 mrb_value
 mrb_nvg_color_value(mrb_state *mrb, NVGcolor color)
 {
-  mrb_value mrbcolor = mrb_obj_new(mrb, mrb_nvg_color_class, 0, NULL);
+  mrb_value mrbcolor = mrb_obj_new(mrb, nvg_color_class, 0, NULL);
   NVGcolor *ncolor = DATA_PTR(mrbcolor);
   *ncolor = color;
   return mrbcolor;
@@ -189,27 +189,27 @@ color_s_transf(mrb_state *mrb, mrb_value klass)
 void
 mrb_nvg_color_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  mrb_nvg_color_class = mrb_define_class_under(mrb, nvg_module, "Color", mrb->object_class);
-  MRB_SET_INSTANCE_TT(mrb_nvg_color_class, MRB_TT_DATA);
+  nvg_color_class = mrb_define_class_under(mrb, nvg_module, "Color", mrb->object_class);
+  MRB_SET_INSTANCE_TT(nvg_color_class, MRB_TT_DATA);
 
-  mrb_define_method(mrb, mrb_nvg_color_class, "initialize", color_initialize, MRB_ARGS_ANY());
-  mrb_define_method(mrb, mrb_nvg_color_class, "initialize_copy", color_initialize_copy, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_color_class, "r", color_get_r,  MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_color_class, "g", color_get_g,  MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_color_class, "b", color_get_b,  MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_color_class, "a", color_get_a,  MRB_ARGS_NONE());
-  mrb_define_method(mrb, mrb_nvg_color_class, "r=", color_set_r, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_color_class, "g=", color_set_g, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_color_class, "b=", color_set_b, MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, mrb_nvg_color_class, "a=", color_set_a, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_color_class, "initialize", color_initialize, MRB_ARGS_ANY());
+  mrb_define_method(mrb, nvg_color_class, "initialize_copy", color_initialize_copy, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_color_class, "r", color_get_r,  MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_color_class, "g", color_get_g,  MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_color_class, "b", color_get_b,  MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_color_class, "a", color_get_a,  MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_color_class, "r=", color_set_r, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_color_class, "g=", color_set_g, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_color_class, "b=", color_set_b, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_color_class, "a=", color_set_a, MRB_ARGS_REQ(1));
 
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "rgb",       color_s_new_rgb,   MRB_ARGS_REQ(3));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "rgbf",      color_s_new_rgbf,  MRB_ARGS_REQ(3));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "rgba",      color_s_new_rgba,  MRB_ARGS_REQ(4));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "rgbaf",     color_s_new_rgbaf, MRB_ARGS_REQ(4));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "hsl",       color_s_new_hsl,   MRB_ARGS_REQ(3));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "hsla",      color_s_new_hsla,  MRB_ARGS_REQ(4));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "lerp_rgba", color_s_lerp_rgba, MRB_ARGS_REQ(3));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "trans",     color_s_trans,     MRB_ARGS_REQ(2));
-  mrb_define_class_method(mrb, mrb_nvg_color_class, "transf",    color_s_transf,    MRB_ARGS_REQ(2));
+  mrb_define_class_method(mrb, nvg_color_class, "rgb",       color_s_new_rgb,   MRB_ARGS_REQ(3));
+  mrb_define_class_method(mrb, nvg_color_class, "rgbf",      color_s_new_rgbf,  MRB_ARGS_REQ(3));
+  mrb_define_class_method(mrb, nvg_color_class, "rgba",      color_s_new_rgba,  MRB_ARGS_REQ(4));
+  mrb_define_class_method(mrb, nvg_color_class, "rgbaf",     color_s_new_rgbaf, MRB_ARGS_REQ(4));
+  mrb_define_class_method(mrb, nvg_color_class, "hsl",       color_s_new_hsl,   MRB_ARGS_REQ(3));
+  mrb_define_class_method(mrb, nvg_color_class, "hsla",      color_s_new_hsla,  MRB_ARGS_REQ(4));
+  mrb_define_class_method(mrb, nvg_color_class, "lerp_rgba", color_s_lerp_rgba, MRB_ARGS_REQ(3));
+  mrb_define_class_method(mrb, nvg_color_class, "trans",     color_s_trans,     MRB_ARGS_REQ(2));
+  mrb_define_class_method(mrb, nvg_color_class, "transf",    color_s_transf,    MRB_ARGS_REQ(2));
 }

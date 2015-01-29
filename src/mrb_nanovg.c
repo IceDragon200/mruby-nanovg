@@ -10,6 +10,8 @@
 #include "nvg_transform.h"
 #include "nvg_context.h"
 
+static struct RClass *nvg_module;
+static struct RClass *nvg_err_class;
 
 static mrb_value
 deg_to_rad(mrb_state *mrb, mrb_value klass)
@@ -30,7 +32,9 @@ rad_to_deg(mrb_state *mrb, mrb_value klass)
 void
 mrb_mruby_nanovg_gem_init(mrb_state* mrb)
 {
-  struct RClass *nvg_module = mrb_define_module(mrb, "Nanovg");
+  nvg_module = mrb_define_module(mrb, "Nanovg");
+  nvg_err_class = mrb_define_class(mrb, "NVGError", mrb_class_get(mrb, "StandardError"));
+
   mrb_nvg_color_init(mrb, nvg_module);
   mrb_nvg_paint_init(mrb, nvg_module);
   mrb_nvg_transform_init(mrb, nvg_module);
@@ -74,4 +78,5 @@ mrb_mruby_nanovg_gem_init(mrb_state* mrb)
 void
 mrb_mruby_nanovg_gem_final(mrb_state* mrb)
 {
+
 }
