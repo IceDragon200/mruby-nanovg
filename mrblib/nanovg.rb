@@ -1,4 +1,8 @@
 module Nanovg
+  def self.hsl(*args)
+    Nanovg::Color.hsl(*args)
+  end
+
   def self.rgb(*args)
     Nanovg::Color.rgb(*args)
   end
