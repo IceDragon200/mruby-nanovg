@@ -18,6 +18,14 @@ module Nanovg
   def self.rgbaf(*args)
     Nanovg::Color.rgbaf(*args)
   end
+
+  def self.mono(value)
+    Nanovg::Color.mono(value)
+  end
+
+  def self.monof(value)
+    Nanovg::Color.monof(value)
+  end
 end
 
 # alias
