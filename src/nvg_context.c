@@ -469,10 +469,10 @@ context_text_bounds(mrb_state *mrb, mrb_value self)
   mrb_float x;
   mrb_float y;
   char *str;
-  NVGtransform *t;
-  mrb_get_args(mrb, "ffzd", &x, &y, &str, &t, &mrb_nvg_transform_type);
+  NVGtransform *t = NULL;
+  mrb_get_args(mrb, "ffz|d", &x, &y, &str, &t, &mrb_nvg_transform_type);
   context = get_context(mrb, self);
-  return mrb_float_value(mrb, nvgTextBounds(context, x, y, str, NULL, &t->ary[0]));
+  return mrb_float_value(mrb, nvgTextBounds(context, x, y, str, NULL, (t ? &t->ary[0] : NULL)));
 }
 
 static mrb_value
@@ -483,10 +483,10 @@ context_text_box_bounds(mrb_state *mrb, mrb_value self)
   mrb_float y;
   mrb_float brw;
   char *str;
-  NVGtransform *t;
-  mrb_get_args(mrb, "fffzd", &x, &y, &brw, &str, &t, &mrb_nvg_transform_type);
+  NVGtransform *t = NULL;
+  mrb_get_args(mrb, "fffz|d", &x, &y, &brw, &str, &t, &mrb_nvg_transform_type);
   context = get_context(mrb, self);
-  nvgTextBoxBounds(context, x, y, brw, str, NULL, &t->ary[0]);
+  nvgTextBoxBounds(context, x, y, brw, str, NULL, (t ? &t->ary[0] : NULL));
   return self;
 }
 
@@ -522,18 +522,20 @@ context_text_metrics(mrb_state *mrb, mrb_value self)
   return mrb_ary_new_from_values(mrb, 3, vals);
 }
 
-/*static mrb_value
+static mrb_value
 context_text_break_lines(mrb_state *mrb, mrb_value self)
 {
-  NVGcontext *context;
-  char *str;
-  char *end;
-  mrb_int brw;
-  NVGtextRow *rows;
-  int max_rows;
-  context = get_context(mrb, self);
-  return mrb_fixnum_value(nvgTextBreakLines(context, str, end, brw, rows, max_rows));
-}*/
+  //NVGcontext *context;
+  //char *str;
+  //char *end;
+  //mrb_int brw;
+  //NVGtextRow *rows;
+  //int max_rows;
+  //context = get_context(mrb, self);
+  //mrb_get_args(mrb, "z");
+  //return mrb_fixnum_value(nvgTextBreakLines(context, str, end, brw, rows, max_rows));
+  return mrb_fixnum_value(0);
+}
 
 void
 mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
@@ -605,10 +607,10 @@ mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
   mrb_define_method(mrb, nvg_context_class, "font_face",           context_font_face,           MRB_ARGS_REQ(1));
   mrb_define_method(mrb, nvg_context_class, "text",                context_text,                MRB_ARGS_REQ(3));
   mrb_define_method(mrb, nvg_context_class, "text_box",            context_text_box,            MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_REQ(4));
-  mrb_define_method(mrb, nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_REQ(5));
+  mrb_define_method(mrb, nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_ARG(3, 1));
+  mrb_define_method(mrb, nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_ARG(4, 1));
 
   /*mrb_define_method(mrb, nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));*/
   mrb_define_method(mrb, nvg_context_class, "text_metrics",        context_text_metrics,        MRB_ARGS_NONE());
-  /*mrb_define_method(mrb, nvg_context_class, "text_break_lines",    context_text_break_lines,    MRB_ARGS_REQ(5));*/
+  mrb_define_method(mrb, nvg_context_class, "text_break_lines",    context_text_break_lines,    MRB_ARGS_REQ(5));
 }
