@@ -69,7 +69,6 @@ module Nanovg
     def path
       begin_path
       yield self
-      close_path
     end
 
     def spork
