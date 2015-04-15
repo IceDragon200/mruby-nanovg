@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-#include "nvg.h"
+#include "mrb/nvg/nvg.h"
 #include "nvg_color.h"
 #include "nvg_paint.h"
 #include "nvg_transform.h"

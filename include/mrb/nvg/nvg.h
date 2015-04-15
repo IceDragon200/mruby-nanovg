@@ -6,6 +6,10 @@
 #include <nanovg.h>
 #include <nanovg_gl.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 /*
  * We included just the barebones nanovg_gl header, so we'll need a extern to the
  * context constructor and destructor.
@@ -14,4 +18,7 @@
 NVGcontext* nvgCreateGL2(int flags);
 void nvgDeleteGL2(NVGcontext* ctx);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
