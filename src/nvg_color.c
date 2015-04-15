@@ -18,6 +18,15 @@ mrb_nvg_color_free(mrb_state *mrb, void *ptr)
 
 const struct mrb_data_type mrb_nvg_color_type = { "NVGcolor", mrb_nvg_color_free };
 
+static inline void
+color_cleanup(mrb_state *mrb, mrb_value self)
+{
+  if (DATA_PTR(self)) {
+    mrb_nvg_color_free(mrb, DATA_PTR(self));
+    DATA_PTR(self) = NULL;
+  }
+}
+
 static inline NVGcolor*
 get_color(mrb_state *mrb, mrb_value self)
 {
@@ -42,13 +51,13 @@ color_initialize(mrb_state *mrb, mrb_value self)
   mrb_float a = 0.0;
   NVGcolor *color;
   mrb_get_args(mrb, "|ffff", &r, &g, &b, &a);
+  color_cleanup(mrb, self);
   color = mrb_malloc(mrb, sizeof(NVGcolor));
   color->r = (float)r;
   color->g = (float)g;
   color->b = (float)b;
   color->a = (float)a;
-  DATA_PTR(self) = color;
-  DATA_TYPE(self) = &mrb_nvg_color_type;
+  mrb_data_init(self, color, &mrb_nvg_color_type);
   return self;
 }
 
@@ -58,13 +67,10 @@ color_initialize_copy(mrb_state *mrb, mrb_value self)
   NVGcolor *src;
   NVGcolor *color;
   mrb_get_args(mrb, "d", &src, &mrb_nvg_color_type);
+  color_cleanup(mrb, self);
   color = mrb_malloc(mrb, sizeof(NVGcolor));
   *color = *src;
-  if (DATA_PTR(self)) {
-    mrb_nvg_color_free(mrb, DATA_PTR(self));
-  }
-  DATA_PTR(self) = color;
-  DATA_TYPE(self) = &mrb_nvg_color_type;
+  mrb_data_init(self, color, &mrb_nvg_color_type);
   return self;
 }
 
