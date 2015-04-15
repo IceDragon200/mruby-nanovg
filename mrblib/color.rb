@@ -15,10 +15,24 @@ module Nanovg
       self
     end
 
+    # Creates a monochrome color from the given value
+    #
+    # @param [Integer] value
+    # @return [Color]
+    #
+    # @example
+    #   Nanovg::Color.mono(198)
     def self.mono(value)
       rgb(value, value, value)
     end
 
+    # Creates a monochrome color from the given value
+    #
+    # @param [Float] value
+    # @return [Color]
+    #
+    # @example
+    #   Nanovg::Color.mono(0.7)
     def self.monof(value)
       rgbf(value, value, value)
     end

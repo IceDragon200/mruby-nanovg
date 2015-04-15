@@ -1,32 +1,39 @@
 module Nanovg
-  def self.hsl(*args)
-    Nanovg::Color.hsl(*args)
+  # (see Color.hsl)
+  def self.hsl(h, s, l)
+    Nanovg::Color.hsl(h, s, l)
   end
 
-  def self.rgb(*args)
-    Nanovg::Color.rgb(*args)
+  # (see Color.rgb)
+  def self.rgb(r, g, b)
+    Nanovg::Color.rgb(r, g, b)
   end
 
-  def self.rgbf(*args)
-    Nanovg::Color.rgbf(*args)
+  # (see Color.rgbf)
+  def self.rgbf(r, g, b)
+    Nanovg::Color.rgbf(r, g, b)
   end
 
-  def self.rgba(*args)
-    Nanovg::Color.rgba(*args)
+  # (see Color.rgba)
+  def self.rgba(r, g, b, a)
+    Nanovg::Color.rgba(r, g, b, a)
   end
 
-  def self.rgbaf(*args)
-    Nanovg::Color.rgbaf(*args)
+  # (see Color.rgbaf)
+  def self.rgbaf(r, g, b, a)
+    Nanovg::Color.rgbaf(r, g, b, a)
   end
 
+  # (see Color.mono)
   def self.mono(value)
     Nanovg::Color.mono(value)
   end
 
+  # (see Color.monof)
   def self.monof(value)
     Nanovg::Color.monof(value)
   end
 end
 
-# alias
+# shorthand alias for {Nanovg}
 NVG = Nanovg

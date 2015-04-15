@@ -1,9 +1,19 @@
 module Nanovg
   class Context
+    # Error raised when aborting a draw
+    # @see Nanovg::Context#draw
+    # @see Nanovg::Context#abort_frame
     class AbortFrame < IndexError
     end
 
+    # Initializes the context given a flag
     alias :initialize_w_flags :initialize
+    private :initialize_w_flags
+
+    # @overload initialize
+    # @overload initialize(flags)
+    #   @param [Integer] flags
+    #   {NVGcreateFlags}
     def initialize(*args)
       if args.empty?
         initialize_w_flags(0)
@@ -12,52 +22,62 @@ module Nanovg
       end
     end
 
+    # Copies the current Context transform to the target transform
     alias :copy_current_transform_to :current_transform
-    def current_transform(*args)
-      if args.empty?
-        t = Nanovg::Transform.new
-        copy_current_transform_to(t)
-        t
-      else
-        copy_current_transform_to(*args)
-      end
+
+    # @overload current_transform
+    #   Copies the current Context transform to a new Transform
+    # @overload current_transform(t)
+    #   Copies the current Context transform to t and returns it
+    #   @param [Transform] t
+    # @return [Transform]
+    def current_transform(t = nil)
+      t ||= Nanovg::Transform.new
+      copy_current_transform_to(t)
+      t
     end
 
-    # An ImageHandle is a helper class for managing images from a context
-    # its a simple ruby implementation so it should be garbage collected safely.
-    # Don't try throwing random numbers in it to get a image though,
-    # this don't absolutely 0 checks to ensure validity of the provided
-    # image id.
+    # Creates and returns a ImageHandle.
     # If you pass in a ImageHandle it will return the same handle, handy
     # if your not sure if your variable is an id or a handle.
     #
-    # @param [Integer] image
-    # @return [Nanovg::ImageHandle]
+    # @param [Integer, ImageHandle] image
+    # @return [ImageHandle]
     def image_handle(image)
       if Nanovg::ImageHandle === image
-        return image
+        image
       else
         Nanovg::ImageHandle.new(self, image)
       end
     end
 
-    # Same drill as the ImageHandle, just for fonts instead.
+    # Creates and returns a FontHandle.
+    # If you pass in a FontHandle it will return the same handle, handy
+    # if your not sure if your variable is an id or a handle.
     #
     # @param [Integer] font
     # @return [Nanovg::FontHandle]
     def font_handle(font)
       if Nanovg::FontHandle === font
-        return font
+        font
       else
         Nanovg::FontHandle.new(self, font)
       end
     end
 
+    # Cancels drawing the current frame and raises an AbortFrame.
+    # The AbortFrame is caught if the abort_frame is called in a {#draw} block.
+    #
+    # @raise AbortFrame
     def abort_frame
       cancel_frame
       raise AbortFrame
     end
 
+    # Wraps execution between #begin_frame and #end_frame
+    #
+    # @param (see #begin_frame)
+    # @return [void]
     def draw(*args)
       begin_frame(*args)
       yield self
@@ -66,11 +86,18 @@ module Nanovg
       nil
     end
 
+    # Convience method for {#begin_path}
+    #
+    # @return [void]
     def path
       begin_path
       yield self
     end
 
+    # Convience method for wrapping drawing between a {#save} and {#restore}
+    # call.
+    #
+    # @return [void]
     def spork
       save
       yield self
