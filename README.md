@@ -3,7 +3,7 @@ mruby-nanovg (WIP)
 
 Mruby Bindings for [nanovg](https://github.com/memononen/nanovg).
 
-mruby_build_config.rb
+## mrb_config.rb
 ```ruby
 MRuby::Build.new do |conf|
   #toolchain :gcc
@@ -27,14 +27,15 @@ MRuby::Build.new do |conf|
 end
 ```
 
-Requirements:
+## Requirements:
 ```
-GLEW
+mruby-glew
+mruby-glfw3
 ```
 
 To `test` this binding you'll need [mruby-glfw3](https://github.com/IceDragon200/mruby-glfw3).
 
-TODO:
+## TODO:
 - [ ] Bind
   - [ ] Nanovg::Context.text_glyph_positions
   - [ ] Nanovg::Context.text_break_lines
