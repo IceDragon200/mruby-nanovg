@@ -1,4 +1,7 @@
 module Nanovg
+  # General purpose flag for saying "there are no flags" instead of using a magic number.
+  NO_FLAG = 0
+
   # (see Color.hsl)
   def self.hsl(h, s, l)
     Nanovg::Color.hsl(h, s, l)
