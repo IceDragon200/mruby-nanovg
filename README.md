@@ -33,6 +33,12 @@ mruby-glew
 mruby-glfw3
 ```
 
+## Docs
+```shell
+# to generate docs locally
+rake docs
+```
+
 To `test` this binding you'll need [mruby-glfw3](https://github.com/IceDragon200/mruby-glfw3).
 
 ## TODO:
