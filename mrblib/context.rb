@@ -22,6 +22,8 @@ module Nanovg
       end
     end
 
+    # @!group Transform
+
     # Copies the current Context transform to the target transform
     alias :copy_current_transform_to :current_transform
 
@@ -36,7 +38,9 @@ module Nanovg
       copy_current_transform_to(t)
       t
     end
+    # @!endgroup Transform
 
+    # @!group Handle
     # Creates and returns a ImageHandle.
     # If you pass in a ImageHandle it will return the same handle, handy
     # if your not sure if your variable is an id or a handle.
@@ -64,7 +68,9 @@ module Nanovg
         Nanovg::FontHandle.new(self, font)
       end
     end
+    # @!endgroup Handle
 
+    # @!group Frame
     # Cancels drawing the current frame and raises an AbortFrame.
     # The AbortFrame is caught if the abort_frame is called in a {#draw} block.
     #
@@ -77,6 +83,7 @@ module Nanovg
     # Wraps execution between #begin_frame and #end_frame
     #
     # @param (see #begin_frame)
+    # @yieldparam [self] ctx
     # @return [void]
     def draw(*args)
       begin_frame(*args)
@@ -85,23 +92,48 @@ module Nanovg
     rescue AbortFrame
       nil
     end
+    # @!endgroup Frame
 
+    # @!group Paths
     # Convience method for {#begin_path}
     #
+    # @yieldparam [self] ctx
     # @return [void]
     def path
       begin_path
       yield self
     end
+    # @!endgroup Paths
 
+    # @!group State
     # Convience method for wrapping drawing between a {#save} and {#restore}
     # call.
     #
+    # @yieldparam [self] ctx
     # @return [void]
     def spork
       save
       yield self
       restore
     end
+    # @!endgroup State
+
+    alias :fill_color= :fill_color
+    alias :fill_paint= :fill_paint
+    alias :font_blur= :font_blur
+    alias :font_size= :font_size
+    alias :global_alpha= :global_alpha
+    alias :line_cap= :line_cap
+    alias :line_join= :line_join
+    alias :miter_limit= :miter_limit
+    alias :path_winding= :path_winding
+    alias :stroke_color= :stroke_color
+    alias :stroke_paint= :stroke_paint
+    alias :stroke_width= :stroke_width
+    alias :text_letter_spacing= :text_letter_spacing
+    alias :text_line_height= :text_line_height
+    alias :text_align= :text_align
+    alias :font_face_id= :font_face_id
+    alias :font_face= :font_face
   end
 end
