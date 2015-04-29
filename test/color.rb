@@ -10,10 +10,11 @@ end
 assert('Nanovg::Color#initialize(r, g, b, a)') do
   c = Nanovg::Color.new(0.1, 0.2, 0.3, 0.4)
   assert_kind_of(Nanovg::Color, c)
-  assert_float(0.1, c.r)
-  assert_float(0.2, c.g)
-  assert_float(0.3, c.b)
-  assert_float(0.4, c.a)
+  # floats are meh
+  assert_float(0.1, c.r.round(1))
+  assert_float(0.2, c.g.round(1))
+  assert_float(0.3, c.b.round(1))
+  assert_float(0.4, c.a.round(1))
 end
 
 assert('Nanovg::Color#initialize_copy') do
@@ -33,7 +34,7 @@ assert('Nanovg::Color#r') do
   assert_float(0.0, c.b)
   assert_float(0.0, c.a)
   c.r = 0.1
-  assert_float(0.1, c.r)
+  assert_float(0.1, c.r.round(1))
   assert_float(0.0, c.g)
   assert_float(0.0, c.b)
   assert_float(0.0, c.a)
@@ -47,7 +48,7 @@ assert('Nanovg::Color#g') do
   assert_float(0.0, c.a)
   c.g = 0.1
   assert_float(0.0, c.r)
-  assert_float(0.1, c.g)
+  assert_float(0.1, c.g.round(1))
   assert_float(0.0, c.b)
   assert_float(0.0, c.a)
 end
@@ -61,7 +62,7 @@ assert('Nanovg::Color#b') do
   c.b = 0.1
   assert_float(0.0, c.r)
   assert_float(0.0, c.g)
-  assert_float(0.1, c.b)
+  assert_float(0.1, c.b.round(1))
   assert_float(0.0, c.a)
 end
 
@@ -75,7 +76,7 @@ assert('Nanovg::Color#a') do
   assert_float(0.0, c.r)
   assert_float(0.0, c.g)
   assert_float(0.0, c.b)
-  assert_float(0.1, c.a)
+  assert_float(0.1, c.a.round(1))
 end
 
 assert('Nanovg::Color.hsl') do
