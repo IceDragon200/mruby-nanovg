@@ -587,7 +587,7 @@ mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
   mrb_define_method(mrb, nvg_context_class, "quad_to",             context_quad_to,             MRB_ARGS_REQ(4));
   mrb_define_method(mrb, nvg_context_class, "arc_to",              context_arc_to,              MRB_ARGS_REQ(5));
   mrb_define_method(mrb, nvg_context_class, "close_path",          context_close_path,          MRB_ARGS_NONE());
-  mrb_define_method(mrb, nvg_context_class, "path_winding",        context_path_winding,        MRB_ARGS_NONE());
+  mrb_define_method(mrb, nvg_context_class, "path_winding",        context_path_winding,        MRB_ARGS_REQ(1));
   mrb_define_method(mrb, nvg_context_class, "arc",                 context_arc,                 MRB_ARGS_REQ(6));
   mrb_define_method(mrb, nvg_context_class, "rect",                context_rect,                MRB_ARGS_REQ(4));
   mrb_define_method(mrb, nvg_context_class, "rounded_rect",        context_rounded_rect,        MRB_ARGS_REQ(5));
