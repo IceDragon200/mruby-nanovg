@@ -1,7 +1,15 @@
 module Nanovg
+  include Winding
+  include Solidity
+  include LineCap
+  include Align
+  include ImageFlags
+  include CreateFlags
+
   # General purpose flag for saying "there are no flags" instead of using a magic number.
   NO_FLAG = 0
 
+  # @!group Color
   # (see Color.hsl)
   def self.hsl(h, s, l)
     Nanovg::Color.hsl(h, s, l)
@@ -36,6 +44,7 @@ module Nanovg
   def self.monof(value)
     Nanovg::Color.monof(value)
   end
+  # @!endgroup Color
 end
 
 # shorthand alias for {Nanovg}

@@ -13,10 +13,10 @@ module Nanovg
     # @overload initialize
     # @overload initialize(flags)
     #   @param [Integer] flags
-    #   {NVGcreateFlags}
+    #   {CreateFlags}
     def initialize(*args)
       if args.empty?
-        initialize_w_flags(0)
+        initialize_w_flags(NO_FLAG)
       else
         initialize_w_flags(*args)
       end

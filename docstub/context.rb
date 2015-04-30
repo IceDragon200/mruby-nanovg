@@ -2,6 +2,7 @@ module Nanovg
   # A drawing context
   class Context
     # @param [Integer] flags
+    #   see {Nanovg::CreateFlags}
     def initialize(flags)
     end
 
@@ -93,14 +94,19 @@ module Nanovg
     end
 
     # @param [Integer] cap
+    #   see {Nanovg::LineCap}
+    # @return [self]
     def line_cap(cap)
     end
 
     # @param [Integer] jn
+    #   see {Nanovg::LineCap}
+    # @return [self]
     def line_join(jn)
     end
 
     # @param [Float] alpha
+    # @return [self]
     def global_alpha(alpha)
     end
     # @!endgroup Drawing Settings
@@ -158,12 +164,13 @@ module Nanovg
 
     # @param [String] filename
     # @param [Integer] flags
-    #   see {enum NVGimageFlags}
+    #   see {Nanovg::ImageFlags}
     # @return [Integer] the image handle
     def create_image(filename, flags)
     end
 
     # @param [Integer] flags
+    #   see {Nanovg::ImageFlags}
     # @param [String] data
     # @param [Integer] datasize
     # @return [Integer] the image handle
@@ -173,6 +180,7 @@ module Nanovg
     # @param [Integer] w
     # @param [Integer] h
     # @param [Integer] flags
+    #   see {Nanovg::ImageFlags}
     # @param [String] data
     # @return [self]
     def create_image_rgba(w, h, flags, data)
@@ -313,6 +321,7 @@ module Nanovg
     end
 
     # @param [Integer] winding
+    #   see {Nanovg::Winding}
     # @return [self]
     def path_winding(winding)
     end
