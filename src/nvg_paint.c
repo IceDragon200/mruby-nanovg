@@ -65,15 +65,15 @@ paint_set_ ## _name_(mrb_state *mrb, mrb_value self)        \
   return mrb_nil_value();                                   \
 }
 
-void
-mrb_nvg_paint_free(mrb_state *mrb, void *ptr)
+static void
+paint_free(mrb_state *mrb, void *ptr)
 {
   if (ptr) {
     mrb_free(mrb, ptr);
   }
 }
 
-const struct mrb_data_type mrb_nvg_paint_type = { "NVGpaint", mrb_nvg_paint_free };
+const struct mrb_data_type mrb_nvg_paint_type = { "NVGpaint", paint_free };
 
 mrb_value
 mrb_nvg_paint_value(mrb_state *mrb, NVGpaint paint)
@@ -89,6 +89,7 @@ static mrb_value
 paint_initialize(mrb_state *mrb, mrb_value self)
 {
   NVGpaint *npaint = mrb_malloc(mrb, sizeof(NVGpaint));
+  paint_free(mrb, DATA_PTR(self));
   memset(npaint, sizeof(NVGpaint), 0);
   DATA_PTR(self) = npaint;
   DATA_TYPE(self) = &mrb_nvg_paint_type;
