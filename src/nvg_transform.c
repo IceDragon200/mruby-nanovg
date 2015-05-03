@@ -173,13 +173,13 @@ transform_pre_multiply(mrb_state *mrb, mrb_value self)
 static mrb_value
 transform_inverse(mrb_state *mrb, mrb_value self)
 {
-  int res;
+  mrb_bool res;
   NVGtransform *a;
   NVGtransform *transform;
   mrb_get_args(mrb, "d", &a, &mrb_nvg_transform_type);
   transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);
-  res = nvgTransformInverse(&transform->ary[0], &a->ary[0]);
-  return mrb_fixnum_value(res);
+  res = nvgTransformInverse(&transform->ary[0], &a->ary[0]) == 1;
+  return mrb_bool_value(res);
 }
 
 void
@@ -207,7 +207,7 @@ mrb_nvg_transform_init(mrb_state *mrb, struct RClass *nvg_module)
   mrb_define_method(mrb, nvg_transform_class, "rotate!",         transform_rotate,          MRB_ARGS_REQ(1));
   mrb_define_method(mrb, nvg_transform_class, "skew_x!",         transform_skew_x,          MRB_ARGS_REQ(1));
   mrb_define_method(mrb, nvg_transform_class, "skew_y!",         transform_skew_y,          MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, nvg_transform_class, "multiply",        transform_multiply,        MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, nvg_transform_class, "pre_multiply",    transform_pre_multiply,    MRB_ARGS_REQ(1));
-  mrb_define_method(mrb, nvg_transform_class, "inverse",         transform_inverse,         MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_transform_class, "multiply!",       transform_multiply,        MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_transform_class, "pre_multiply!",   transform_pre_multiply,    MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_transform_class, "inverse!",        transform_inverse,         MRB_ARGS_REQ(1));
 }
