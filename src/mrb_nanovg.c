@@ -30,13 +30,13 @@ void
 mrb_mruby_nanovg_gem_init(mrb_state* mrb)
 {
   struct RClass *nvg_mod = mrb_define_module(mrb, "Nanovg");
-  struct RClass *nvg_err_class = mrb_define_class(mrb, "NVGError", mrb_class_get(mrb, "StandardError"));
   struct RClass *nvg_winding_mod = mrb_define_module_under(mrb, nvg_mod, "Winding");
   struct RClass *nvg_solidity_mod = mrb_define_module_under(mrb, nvg_mod, "Solidity");
   struct RClass *nvg_line_cap_mod = mrb_define_module_under(mrb, nvg_mod, "LineCap");
   struct RClass *nvg_align_mod = mrb_define_module_under(mrb, nvg_mod, "Align");
   struct RClass *nvg_image_flags_mod = mrb_define_module_under(mrb, nvg_mod, "ImageFlags");
   struct RClass *nvg_create_flags_mod = mrb_define_module_under(mrb, nvg_mod, "CreateFlags");
+  mrb_define_class(mrb, "NVGError", mrb_class_get(mrb, "StandardError"));
 
   mrb_nvg_color_init(mrb, nvg_mod);
   mrb_nvg_paint_init(mrb, nvg_mod);
