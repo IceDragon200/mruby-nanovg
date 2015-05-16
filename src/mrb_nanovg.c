@@ -46,6 +46,16 @@ mrb_mruby_nanovg_gem_init(mrb_state* mrb)
   mrb_define_class_method(mrb, nvg_mod, "deg_to_rad", deg_to_rad, MRB_ARGS_REQ(1));
   mrb_define_class_method(mrb, nvg_mod, "rad_to_deg", rad_to_deg, MRB_ARGS_REQ(1));
 
+#if MRUBY_NANOVG_GL2
+  mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GL2"));
+#elif MRUBY_NANOVG_GL3
+  mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GL3"));
+#elif MRUBY_NANOVG_GLES2
+  mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GLES2"));
+#elif MRUBY_NANOVG_GLES3
+  mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GLES3"));
+#endif
+
   /* enum NVGwinding */
   mrb_define_const(mrb, nvg_winding_mod, "CW",                     mrb_fixnum_value(NVG_CW));
   mrb_define_const(mrb, nvg_winding_mod, "CCW",                    mrb_fixnum_value(NVG_CCW));

@@ -4,6 +4,8 @@
 #include <mruby/numeric.h>
 #include <mruby/array.h>
 
+#include "nvg_impl.h"
+#include <nanovg_gl.h>
 #include "nvg_private.h"
 #include "nvg_context.h"
 #include "nvg_color.h"
@@ -210,7 +212,7 @@ void
 mrb_nvg_context_free(mrb_state *mrb, void *ptr)
 {
   if (ptr) {
-    nvgDeleteGL2((NVGcontext*)ptr);
+    mrb_nvgDeleteGL((NVGcontext*)ptr);
   }
 }
 
@@ -228,12 +230,11 @@ context_initialize(mrb_state *mrb, mrb_value self)
   mrb_int flags;
   NVGcontext *context;
   mrb_get_args(mrb, "i", &flags);
-  context = nvgCreateGL2(flags);
+  context = mrb_nvgCreateGL(flags);
   if (!context) {
     mrb_raise(mrb, E_NVG_ERROR, "Could not create Context.");
   }
-  DATA_PTR(self) = context;
-  DATA_TYPE(self) = &mrb_nvg_context_type;
+  mrb_data_init(self, context, &mrb_nvg_context_type);
   return self;
 }
 
