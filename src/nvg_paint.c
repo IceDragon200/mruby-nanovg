@@ -8,8 +8,6 @@
 #include "nvg_color.h"
 #include "nvg_transform.h"
 
-static struct RClass *nvg_paint_class;
-
 #define ATTR_GET_HEAD(_name_) \
 static mrb_value                                           \
 paint_get_ ## _name_(mrb_state *mrb, mrb_value self)       \
@@ -75,11 +73,17 @@ paint_free(mrb_state *mrb, void *ptr)
 
 const struct mrb_data_type mrb_nvg_paint_type = { "NVGpaint", paint_free };
 
+static inline struct RClass*
+mrb_nvg_paint_class_get(mrb_state *mrb)
+{
+  return mrb_class_get_under(mrb, mrb_module_get(mrb, "Nanovg"), "Paint");
+}
+
 mrb_value
 mrb_nvg_paint_value(mrb_state *mrb, NVGpaint paint)
 {
   NVGpaint *npaint;
-  mrb_value mrbpaint = mrb_obj_new(mrb, nvg_paint_class, 0, NULL);
+  mrb_value mrbpaint = mrb_obj_new(mrb, mrb_nvg_paint_class_get(mrb), 0, NULL);
   npaint = mrb_data_get_ptr(mrb, mrbpaint, &mrb_nvg_paint_type);
   *npaint = paint;
   return mrbpaint;
@@ -153,7 +157,7 @@ ATTR_SET_i(image);
 void
 mrb_nvg_paint_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  nvg_paint_class = mrb_define_class_under(mrb, nvg_module, "Paint", mrb->object_class);
+  struct RClass *nvg_paint_class = mrb_define_class_under(mrb, nvg_module, "Paint", mrb->object_class);
   MRB_SET_INSTANCE_TT(nvg_paint_class, MRB_TT_DATA);
 
   mrb_define_method(mrb, nvg_paint_class, "initialize",   paint_initialize,     MRB_ARGS_NONE());

@@ -6,8 +6,6 @@
 #include "nvg_color.h"
 #include "mrb_helper_macros.h"
 
-static struct RClass *nvg_color_class;
-
 void
 mrb_nvg_color_free(mrb_state *mrb, void *ptr)
 {
@@ -33,10 +31,16 @@ get_color(mrb_state *mrb, mrb_value self)
   return (NVGcolor*)mrb_data_get_ptr(mrb, self, &mrb_nvg_color_type);
 }
 
+static inline struct RClass*
+mrb_nvg_color_class_get(mrb_state *mrb)
+{
+  return mrb_class_get_under(mrb, mrb_module_get(mrb, "Nanovg"), "Color");
+}
+
 mrb_value
 mrb_nvg_color_value(mrb_state *mrb, NVGcolor color)
 {
-  mrb_value result = mrb_obj_new(mrb, nvg_color_class, 0, NULL);
+  mrb_value result = mrb_obj_new(mrb, mrb_nvg_color_class_get(mrb), 0, NULL);
   NVGcolor *ncolor = DATA_PTR(result);
   *ncolor = color;
   return result;
@@ -214,7 +218,7 @@ color_s_transf(mrb_state *mrb, mrb_value klass)
 void
 mrb_nvg_color_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  nvg_color_class = mrb_define_class_under(mrb, nvg_module, "Color", mrb->object_class);
+  struct RClass *nvg_color_class = mrb_define_class_under(mrb, nvg_module, "Color", mrb->object_class);
   MRB_SET_INSTANCE_TT(nvg_color_class, MRB_TT_DATA);
 
   mrb_define_method(mrb, nvg_color_class, "initialize", color_initialize, MRB_ARGS_ANY());

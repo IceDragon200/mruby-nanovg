@@ -5,9 +5,7 @@
 #include <mruby/numeric.h>
 #include "nvg_transform.h"
 
-static struct RClass *nvg_transform_class;
-
-void
+static void
 mrb_nvg_transform_free(mrb_state *mrb, void *ptr)
 {
   if (ptr) {
@@ -17,11 +15,17 @@ mrb_nvg_transform_free(mrb_state *mrb, void *ptr)
 
 const struct mrb_data_type mrb_nvg_transform_type = { "NVGtransform", mrb_nvg_transform_free };
 
+static inline struct RClass*
+mrb_nvg_transform_class_get(mrb_state *mrb)
+{
+  return mrb_class_get_under(mrb, mrb_module_get(mrb, "Nanovg"), "Transform");
+}
+
 mrb_value
 mrb_nvg_transform_value(mrb_state *mrb, float *xform)
 {
   NVGtransform *t;
-  mrb_value transform = mrb_obj_new(mrb, nvg_transform_class, 0, NULL);
+  mrb_value transform = mrb_obj_new(mrb, mrb_nvg_transform_class_get(mrb), 0, NULL);
   t = mrb_data_get_ptr(mrb, transform, &mrb_nvg_transform_type);
   memcpy(&t->ary[0], xform, sizeof(float) * 6);
   return transform;
@@ -185,7 +189,7 @@ transform_inverse(mrb_state *mrb, mrb_value self)
 void
 mrb_nvg_transform_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  nvg_transform_class = mrb_define_class_under(mrb, nvg_module, "Transform", mrb->object_class);
+  struct RClass *nvg_transform_class = mrb_define_class_under(mrb, nvg_module, "Transform", mrb->object_class);
   MRB_SET_INSTANCE_TT(nvg_transform_class, MRB_TT_DATA);
 
   mrb_define_method(mrb, nvg_transform_class, "initialize",      transform_initialize,      MRB_ARGS_ANY());

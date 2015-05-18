@@ -12,7 +12,6 @@
 #include "nvg_paint.h"
 #include "nvg_transform.h"
 
-
 /* Used for generating functions which only take a context */
 #define DEFINE_FUNC_N0_HEAD(_mrb_name_, _func_name_) \
 static mrb_value                           \
@@ -205,8 +204,6 @@ nvgTextBox_mrb(NVGcontext *context, float x, float y, float breakRowWidth, const
 {
   nvgTextBox(context, x, y, breakRowWidth, string, NULL);
 }
-
-static struct RClass *nvg_context_class;
 
 void
 mrb_nvg_context_free(mrb_state *mrb, void *ptr)
@@ -541,7 +538,7 @@ context_text_break_lines(mrb_state *mrb, mrb_value self)
 void
 mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
 {
-  nvg_context_class = mrb_define_class_under(mrb, nvg_module, "Context", mrb->object_class);
+  struct RClass *nvg_context_class = mrb_define_class_under(mrb, nvg_module, "Context", mrb->object_class);
   MRB_SET_INSTANCE_TT(nvg_context_class, MRB_TT_DATA);
 
   mrb_define_method(mrb, nvg_context_class, "initialize",          context_initialize,          MRB_ARGS_REQ(1));
