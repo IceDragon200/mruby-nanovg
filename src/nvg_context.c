@@ -205,15 +205,15 @@ nvgTextBox_mrb(NVGcontext *context, float x, float y, float breakRowWidth, const
   nvgTextBox(context, x, y, breakRowWidth, string, NULL);
 }
 
-void
-mrb_nvg_context_free(mrb_state *mrb, void *ptr)
+static void
+context_free(mrb_state *mrb, void *ptr)
 {
   if (ptr) {
     mrb_nvgDeleteGL((NVGcontext*)ptr);
   }
 }
 
-const struct mrb_data_type mrb_nvg_context_type = { "NVGcontext", mrb_nvg_context_free };
+const struct mrb_data_type mrb_nvg_context_type = { "NVGcontext", context_free };
 
 static inline NVGcontext*
 get_context(mrb_state *mrb, mrb_value self)
@@ -232,6 +232,16 @@ context_initialize(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_NVG_ERROR, "Could not create Context.");
   }
   mrb_data_init(self, context, &mrb_nvg_context_type);
+  return self;
+}
+
+static mrb_value
+context_destroy(mrb_state *mrb, mrb_value self)
+{
+  NVGcontext *ctx = get_context(mrb, self);
+  context_free(mrb, (void*)ctx);
+  DATA_PTR(self) = NULL;
+  DATA_TYPE(self) = NULL;
   return self;
 }
 
@@ -542,6 +552,7 @@ mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
   MRB_SET_INSTANCE_TT(nvg_context_class, MRB_TT_DATA);
 
   mrb_define_method(mrb, nvg_context_class, "initialize",          context_initialize,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_context_class, "destroy",             context_destroy,             MRB_ARGS_NONE());
   mrb_define_method(mrb, nvg_context_class, "begin_frame",         context_begin_frame,         MRB_ARGS_REQ(3));
   mrb_define_method(mrb, nvg_context_class, "cancel_frame",        context_cancel_frame,        MRB_ARGS_NONE());
   mrb_define_method(mrb, nvg_context_class, "end_frame",           context_end_frame,           MRB_ARGS_NONE());

@@ -6,6 +6,13 @@ module Nanovg
     def initialize(flags)
     end
 
+    # Destroys the context and frees all underlying resources.
+    # Don't shoot yourself in the foot with this.
+    #
+    # @return [self]
+    def destroy
+    end
+
     # @!group Frame
     # Starts drawing, call {#end_frame} when you have finished drawing to
     # commit the changes.
