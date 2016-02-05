@@ -6,6 +6,13 @@ GRAPH_RENDER_FPS = 0
 GRAPH_RENDER_MS = 1
 GRAPH_RENDER_PERCENT = 2
 
+ICON_SEARCH = "\u{1F50D}"
+ICON_CIRCLED_CROSS = "\u{2716}"
+ICON_CHEVRON_RIGHT = "\u{E75E}"
+ICON_CHECK = "\u{2713}"
+ICON_LOGIN = "\u{E740}"
+ICON_TRASH = "\u{E729}"
+
 class PerfGraph
   GRAPH_HISTORY_COUNT = 100
 
@@ -146,6 +153,10 @@ class GL2Demo
     }
   end
 
+  def is_black?(col)
+    return col.r == 0.0 && col.g == 0.0 && col.b == 0.0 && col.a == 0.0
+  end
+
   def errorcb(error, desc)
     print "GLFW error #{error}: #{desc}"
   end
@@ -176,7 +187,7 @@ class GL2Demo
     blink = 1 - (Math.sin(t * 0.5) ** 200) * 0.8
 
     bg = vg.linear_gradient(x, y + h * 0.5, x + w * 0.1, y + h,
-                            NVG.rgba(0, 0, 0, 32), NVG.rgba(0, 0, 0, 16));
+                            NVG.rgba(0, 0, 0, 32), NVG.rgba(0, 0, 0, 16))
     vg.path do |v|
       v.ellipse(lx + 3.0, ly + 16.0, ex, ey)
       v.ellipse(rx + 3.0, ry + 16.0, ex, ey)
@@ -184,7 +195,7 @@ class GL2Demo
       v.fill
     end
     bg = vg.linear_gradient(x, y + h * 0.25, x + w * 0.1, y + h,
-                            NVG.rgba(220, 220, 220, 255), NVG.rgba(128, 128, 128, 255));
+                            NVG.rgba(220, 220, 220, 255), NVG.rgba(128, 128, 128, 255))
     vg.path do |v|
       v.ellipse(lx, ly, ex, ey)
       v.ellipse(rx, ry, ex, ey)
@@ -277,7 +288,7 @@ class GL2Demo
 
     # Graph Line
     vg.path do |nvg|
-      nvg.move_to(sx[0], sy[0])
+      nvg.move_to(sx[0], sy[0] + 2)
       1.upto(5) do |i|
         nvg.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1] + 2, sx[i] - dx * 0.5, sy[i] + 2, sx[i], sy[i] + 2)
       end
@@ -325,7 +336,102 @@ class GL2Demo
   end
 
   def draw_colorwheel(vg, x, y, w, h, t)
-    # TODO
+    hue = Math.sin(t * 0.12)
+
+    vg.spork do
+      cx = x + w*0.5
+      cy = y + h*0.5
+      r1 = (w < h ? w : h) * 0.5 - 5.0
+      r0 = r1 - 20.0
+      # half a pixel arc length in radians (2pi cancels out).
+      aeps = 0.5 / r1
+
+      6.times do |i|
+        a0 = i / 6.0 * Math::PI * 2.0 - aeps
+        a1 = (i+1.0) / 6.0 * Math::PI * 2.0 + aeps
+        vg.begin_path
+        vg.arc(cx, cy, r0, a0, a1, NVG::CW)
+        vg.arc(cx, cy, r1, a1, a0, NVG::CCW)
+        vg.close_path
+        ax = cx + Math.cos(a0) * (r0 + r1) * 0.5
+        ay = cy + Math.sin(a0) * (r0 + r1) * 0.5
+        bx = cx + Math.cos(a1) * (r0 + r1) * 0.5
+        by = cy + Math.sin(a1) * (r0 + r1) * 0.5
+        paint = vg.linear_gradient(ax,ay, bx,by, NVG.hsla(a0/(Math::PI*2),1.0,0.55,255), NVG.hsla(a1/(Math::PI*2),1.0,0.55,255))
+        vg.fill_paint(paint)
+        vg.fill
+      end
+
+      vg.path do
+        vg.circle(cx,cy, r0 - 0.5)
+        vg.circle(cx,cy, r1 + 0.5)
+        vg.stroke_color(NVG.rgba(0,0,0,64))
+        vg.stroke_width(1.0)
+        vg.stroke
+      end
+
+      # Selector
+      vg.spork do
+        vg.translate(cx, cy)
+        vg.rotate(hue * Math::PI * 2)
+
+        # Marker on
+        vg.stroke_width(2.0)
+        vg.path do
+          vg.rect(r0-1,-3,r1-r0+2,6)
+          vg.stroke_color(NVG.rgba(255,255,255,192))
+          vg.stroke
+        end
+
+        paint = vg.box_gradient(r0-3,-5,r1-r0+6,10, 2,4, NVG.rgba(0,0,0,128), NVG.rgba(0,0,0,0))
+        vg.path do
+          vg.rect(r0-2-10,-4-10,r1-r0+4+20,8+20)
+          vg.rect(r0-2,-4,r1-r0+4,8)
+          vg.path_winding(NVG::Solidity::HOLE)
+          vg.fill_paint(paint)
+          vg.fill
+        end
+
+        # Center triangle
+        r = r0 - 6
+        ax = Math.cos(120.0/180.0*Math::PI) * r
+        ay = Math.sin(120.0/180.0*Math::PI) * r
+        bx = Math.cos(-120.0/180.0*Math::PI) * r
+        by = Math.sin(-120.0/180.0*Math::PI) * r
+        vg.begin_path
+        vg.move_to(r, 0)
+        vg.line_to(ax, ay)
+        vg.line_to(bx, by)
+        vg.close_path
+        paint = vg.linear_gradient(r,0, ax,ay, NVG.hsla(hue,1.0,0.5,255), NVG.rgba(255,255,255,255))
+        vg.fill_paint(paint)
+        vg.fill
+        paint = vg.linear_gradient((r+ax)*0.5,(0+ay)*0.5, bx,by, NVG.rgba(0,0,0,0), NVG.rgba(0,0,0,255))
+        vg.fill_paint(paint)
+        vg.fill
+        vg.stroke_color(NVG.rgba(0,0,0,64))
+        vg.stroke
+
+        # Select circle on triangle
+        ax = Math.cos(120.0 / 180.0 * Math::PI) * r * 0.3
+        ay = Math.sin(120.0 / 180.0 * Math::PI) * r * 0.4
+        vg.stroke_width(2.0)
+        vg.path do
+          vg.circle(ax, ay, 5)
+          vg.stroke_color(NVG.rgba(255,255,255,192))
+          vg.stroke
+        end
+
+        paint = vg.radial_gradient(ax,ay, 7,9, NVG.rgba(0,0,0,64), NVG.rgba(0,0,0,0))
+        vg.path do
+          vg.rect(ax-20,ay-20,40,40)
+          vg.circle(ax,ay,7)
+          vg.path_winding(NVG::HOLE)
+          vg.fill_paint(paint)
+          vg.fill
+        end
+      end
+    end
   end
 
   def draw_lines(vg, x, y, w, h, t)
@@ -522,7 +628,217 @@ class GL2Demo
     vg.font_face('icons')
     vg.fill_color(NVG.rgba(255, 255, 255, 64))
     vg.text_align(NVG::ALIGN_CENTER | NVG::ALIGN_MIDDLE)
-    vg.text(x + h * 0.55, y + h * 0.55, '🔍')
+    vg.text(x + h * 0.55, y + h * 0.55, ICON_SEARCH)
+
+    vg.font_size(20)
+    vg.font_face('sans')
+    vg.fill_color(NVG.rgba(255, 255, 255, 32))
+    vg.text_align(NVG::ALIGN_LEFT | NVG::ALIGN_MIDDLE)
+    vg.text(x + h * 1.05, y + h * 0.5, text)
+
+    vg.font_size(h * 1.3)
+    vg.font_face('icons')
+    vg.fill_color(NVG.rgba(255, 255, 255, 32))
+    vg.text_align(NVG::ALIGN_CENTER | NVG::ALIGN_MIDDLE)
+    vg.text(x + h * 0.55, y + h * 0.55, ICON_CIRCLED_CROSS)
+  end
+
+  def draw_drop_down(vg, text, x, y, w, h)
+    bg = vg.linear_gradient(x, y, x, y + h, NVG.rgba(255, 255, 255, 16), NVG.rgba(0, 0, 0, 16))
+    corner_radius = 4.0
+    vg.path do
+      vg.rounded_rect(x + 1, y + 1, w - 2, h - 2, corner_radius - 1)
+      vg.fill_paint(bg)
+      vg.fill
+    end
+
+    vg.path do
+      vg.rounded_rect(x + 0.5,y+0.5, w-1,h-1, corner_radius - 0.5)
+      vg.stroke_color(NVG.rgba(0,0,0,48))
+      vg.stroke
+    end
+
+    vg.font_size(20.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,160))
+    vg.text_align(NVG::ALIGN_LEFT | NVG::ALIGN_MIDDLE)
+    vg.text(x + h * 0.3, y + h * 0.5, text)
+
+    vg.font_size(h * 1.3)
+    vg.font_face("icons")
+    vg.fill_color(NVG.rgba(255,255,255,64))
+    vg.text_align(NVG::ALIGN_CENTER|NVG::ALIGN_MIDDLE)
+    vg.text(x + w - h * 0.5, y + h * 0.5, ICON_CHEVRON_RIGHT)
+  end
+
+  def draw_label(vg, text, x, y, _w, h)
+    vg.font_size(18.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,128))
+
+    vg.text_align(NVG::ALIGN_LEFT|NVG::ALIGN_MIDDLE)
+    vg.text(x, y + h * 0.5, text)
+  end
+
+  def draw_edit_box_base(vg, x, y, w, h)
+    # Edit
+    bg = vg.box_gradient(x + 1, y + 1 + 1.5, w - 2, h - 2, 3, 4, NVG.rgba(255,255,255,32), NVG.rgba(32,32,32,32))
+    vg.path do
+      vg.rounded_rect(x + 1, y + 1, w - 2, h - 2, 4 - 1)
+      vg.fill_paint(bg)
+      vg.fill
+    end
+
+    vg.path do
+      vg.rounded_rect(x + 0.5, y + 0.5, w - 1, h - 1, 4 - 0.5)
+      vg.stroke_color(NVG.rgba(0,0,0,48))
+      vg.stroke
+    end
+  end
+
+  def draw_edit_box(vg, text, x, y, w, h)
+    draw_edit_box_base(vg, x, y, w, h)
+
+    vg.font_size(20.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,64))
+    vg.text_align(NVG::ALIGN_LEFT|NVG::ALIGN_MIDDLE)
+    vg.text(x+h*0.3,y+h*0.5,text)
+  end
+
+  def draw_edit_box_num(vg, text, units, x, y, w, h)
+    draw_edit_box_base(vg, x, y, w, h)
+
+    uw = vg.text_bounds(0, 0, units)
+
+    vg.font_size(18.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,64))
+    vg.text_align(NVG::ALIGN_RIGHT|NVG::ALIGN_MIDDLE)
+    vg.text(x+w-h*0.3,y+h*0.5,units)
+
+    vg.font_size(20.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,128))
+    vg.text_align(NVG::ALIGN_RIGHT|NVG::ALIGN_MIDDLE)
+    vg.text(x+w-uw-h*0.5,y+h*0.5,text)
+  end
+
+  def draw_check_box(vg, text, x, y, w, h)
+    vg.font_size(18.0)
+    vg.font_face("sans")
+    vg.fill_color(NVG.rgba(255,255,255,160))
+
+    vg.text_align(NVG::ALIGN_LEFT|NVG::ALIGN_MIDDLE)
+    vg.text(x+28,y+h*0.5,text)
+
+    bg = vg.box_gradient(x + 1, y + (h * 0.5).to_i - 9 + 1, 18, 18, 3, 3, NVG.rgba(0,0,0,32), NVG.rgba(0,0,0,92))
+    vg.path do
+      vg.rounded_rect(x + 1, y + (h * 0.5).to_i - 9, 18, 18, 3)
+      vg.fill_paint(bg)
+      vg.fill
+    end
+
+    vg.font_size(40)
+    vg.font_face("icons")
+    vg.fill_color(NVG.rgba(255,255,255,128))
+    vg.text_align(NVG::ALIGN_CENTER|NVG::ALIGN_MIDDLE)
+    vg.text(x+9+2, y+h*0.5, ICON_CHECK)
+  end
+
+  def draw_button(vg, preicon, text, x, y, w, h, col)
+    corner_radius = 4.0
+    tw = 0
+    iw = 0
+
+    bg = vg.linear_gradient(x, y, x, y + h, NVG.rgba(255,255,255,is_black?(col)?16:32), NVG.rgba(0,0,0,is_black?(col)?16:32))
+    vg.path do
+      vg.rounded_rect(x + 1, y + 1, w - 2, h - 2, corner_radius - 1)
+      if !is_black?(col)
+        vg.fill_color(col)
+        vg.fill
+      end
+      vg.fill_paint(bg)
+      vg.fill
+    end
+
+    vg.path do
+      vg.rounded_rect(x + 0.5, y + 0.5, w - 1, h - 1, corner_radius - 0.5)
+      vg.stroke_color(NVG.rgba(0,0,0,48))
+      vg.stroke
+    end
+
+    vg.font_size(20.0)
+    vg.font_face("sans-bold")
+    tw = vg.text_bounds(0,0, text)
+    if preicon != 0
+      vg.font_size(h*1.3)
+      vg.font_face("icons")
+      iw = vg.text_bounds(0,0, preicon)
+      iw += h * 0.15
+    end
+
+    if preicon != 0
+      vg.font_size(h * 1.3)
+      vg.font_face("icons")
+      vg.fill_color(NVG.rgba(255,255,255,96))
+      vg.text_align(NVG::Align::ALIGN_LEFT|NVG::Align::ALIGN_MIDDLE)
+      vg.text(x + w * 0.5 - tw * 0.5 - iw * 0.75, y + h * 0.5, preicon)
+    end
+
+    vg.font_size(20.0)
+    vg.font_face("sans-bold")
+    vg.text_align(NVG::Align::ALIGN_LEFT|NVG::Align::ALIGN_MIDDLE)
+    vg.fill_color(NVG.rgba(0,0,0,160))
+    vg.text(x+w*0.5-tw*0.5+iw*0.25,y+h*0.5-1,text)
+    vg.fill_color(NVG.rgba(255,255,255,160))
+    vg.text(x+w*0.5-tw*0.5+iw*0.25,y+h*0.5,text)
+  end
+
+  def draw_slider(vg, pos, x, y, w, h)
+    cy = y + (h * 0.5).to_i
+    kr = (h * 0.25).to_i
+
+    vg.spork do
+
+      # Slot
+      bg = vg.box_gradient(x,cy-2+1, w,4, 2,2, NVG.rgba(0,0,0,32), NVG.rgba(0,0,0,128))
+      vg.path do
+        vg.rounded_rect(x, cy - 2, w, 4, 2)
+        vg.fill_paint(bg)
+        vg.fill
+      end
+
+      # Knob Shadow
+      bg = vg.radial_gradient(x+(pos*w).to_i,cy+1, kr-3,kr+3, NVG.rgba(0,0,0,64), NVG.rgba(0,0,0,0))
+      vg.path do
+        vg.rect(x + (pos * w).to_i - kr - 5, cy - kr - 5, kr * 2 + 5 + 5, kr * 2 + 5 + 5 + 3)
+        vg.circle(x + (pos * w).to_i, cy, kr)
+        vg.path_winding(NVG::Solidity::HOLE)
+        vg.fill_paint(bg)
+        vg.fill
+      end
+
+      # Knob
+      knob = vg.linear_gradient(x,cy-kr,x,cy+kr, NVG.rgba(255,255,255,16), NVG.rgba(0,0,0,16))
+      vg.path do
+        vg.circle(x + (pos * w).to_i,cy, kr-1)
+        vg.fill_color(NVG.rgba(40,43,48,255))
+        vg.fill
+        vg.fill_paint(knob)
+        vg.fill
+      end
+
+      vg.path do
+        vg.circle(x + (pos * w).to_i, cy, kr - 0.5)
+        vg.stroke_color(NVG.rgba(0, 0, 0, 92))
+        vg.stroke
+      end
+    end
+  end
+
+  def draw_thumbnails(vg, x, y, w, h, images, t)
+    nimages = images.size
   end
 
   def render(vg, mx, my, width, height, t, blowup, data = nil)
@@ -548,10 +864,39 @@ class GL2Demo
         vg.scale(2.0, 2.0)
       end
 
+      # Widgets
       draw_window(vg, 'Widgets `n Stuff', 50, 50, 300, 400)
       x = 60
       y = 95
       draw_search_box(vg, 'Search', x, y, 280, 25)
+      y += 40
+      draw_drop_down(vg, 'Effects', x, y, 280, 28)
+      popy = y + 14
+      y += 45
+
+      # Form
+      draw_label(vg, "Login", x, y, 280, 20)
+      y += 25
+      draw_edit_box(vg, "Email",  x, y, 280, 28)
+      y += 35
+      draw_edit_box(vg, "Password", x, y, 280, 28)
+      y += 38
+      draw_check_box(vg, "Remember me", x, y, 140, 28)
+      draw_button(vg, ICON_LOGIN, "Sign in", x + 138, y, 140, 28, NVG.rgba(0, 96, 128, 255))
+      y += 45
+
+      # Slider
+      draw_label(vg, "Diameter", x, y, 280,20)
+      y += 25
+      draw_edit_box_num(vg, "123.00", "px", x + 180,y, 100,28)
+      draw_slider(vg, 0.4, x, y, 170, 28)
+      y += 55
+
+      draw_button(vg, ICON_TRASH, "Delete", x, y, 160, 28, NVG.rgba(128, 16, 8, 255))
+      draw_button(vg, 0, "Cancel", x + 170, y, 110, 28, NVG.rgba(0, 0, 0, 0))
+
+      # Thumbnails box
+      draw_thumbnails(vg, 365, popy - 30, 160, 300, data[:images], t)
     end
   end
 
