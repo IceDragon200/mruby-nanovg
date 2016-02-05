@@ -94,7 +94,7 @@ paint_initialize(mrb_state *mrb, mrb_value self)
 {
   NVGpaint *npaint = mrb_malloc(mrb, sizeof(NVGpaint));
   paint_free(mrb, DATA_PTR(self));
-  memset(npaint, sizeof(NVGpaint), 0);
+  memset(npaint, 0, sizeof(NVGpaint));
   DATA_PTR(self) = npaint;
   DATA_TYPE(self) = &mrb_nvg_paint_type;
   return self;
