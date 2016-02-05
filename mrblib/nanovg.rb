@@ -15,6 +15,12 @@ module Nanovg
     Nanovg::Color.hsl(h, s, l)
   end
 
+  # @!group Color
+  # (see Color.hsla)
+  def self.hsla(h, s, l, a)
+    Nanovg::Color.hsla(h, s, l, a)
+  end
+
   # (see Color.rgb)
   def self.rgb(r, g, b)
     Nanovg::Color.rgb(r, g, b)
