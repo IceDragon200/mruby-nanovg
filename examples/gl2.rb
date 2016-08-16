@@ -252,8 +252,94 @@ class GL2Demo
     end
   end
 
-  def draw_paragraph(vg, x, y, w, h, mx, my)
-    # TODO
+  def draw_paragraph(vg, x, y, width, _height, mx, my)
+    text = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party."
+    lnum = 0
+    gutter = 0
+    bounds = NVG::Transform.new
+    gx = x
+    gy = y
+    vg.spork do
+      vg.font_size 18.0
+      vg.font_face "sans"
+      vg.text_align NVG::ALIGN_LEFT | NVG::ALIGN_TOP
+      _, _, lineh = vg.text_metrics
+
+      vg.text_break_lines text, width do |row_string, row_width, min_x, max_x|
+        hit = mx > x && mx < (x + width) && my >= y && my < (y + lineh)
+        vg.path do
+          vg.fill_color NVG.rgba(255, 255, 255, hit ? 64 : 16)
+          vg.rect x, y, row_width, lineh
+          vg.fill
+        end
+        vg.fill_color NVG.rgba(255, 255, 255, 255)
+        vg.text x, y, row_string
+        if hit
+          caretx = (mx < (x + row_width / 2)) ? x : x + row_width
+          px = x
+          glyphs = vg.text_glyph_positions x, y, row_string
+          glyphs.each_with_index do |gylph, j|
+            x0 = gylph[0]
+            x1 = j + 1 < row_string.size ? glyphs[j + 1][0] : x + row_width
+            gx = x0 * 0.3 + x1 * 0.7
+            if mx >= px && mx < gx
+              caretx = glyphs[j][0]
+            end
+            px = gx
+          end
+          vg.path do
+            vg.fill_color NVG.rgba(255, 192, 0, 255)
+            vg.rect caretx, y, 1, lineh
+            vg.fill
+          end
+
+          gutter = lnum + 1
+          gx = x - 10
+          gy = y + (lineh / 2)
+        end
+        lnum = lnum + 1
+        y += lineh
+      end
+
+      if gutter > 0
+        txt = gutter.to_s
+        vg.font_size 13.0
+        vg.text_align NVG::ALIGN_RIGHT | NVG::ALIGN_MIDDLE
+        vg.text_bounds gx, gy, txt, bounds
+        vg.path do
+          vg.fill_color NVG.rgba(255, 192, 0, 255)
+          vg.rounded_rect bounds[0].to_i - 4, bounds[1].to_i - 2, (bounds[2] - bounds[0]).to_i + 8, (bounds[3] - bounds[1]).to_i + 4, ((bounds[3] - bounds[1]).to_i + 4) / 2 - 1
+          vg.fill
+        end
+        vg.fill_color NVG.rgba(32, 32, 32, 255)
+        vg.text gx, gy, txt
+      end
+
+      y += 20.0
+
+      vg.font_size 13.0
+      vg.text_align NVG::ALIGN_LEFT | NVG::ALIGN_TOP
+      vg.text_line_height 1.2
+
+      tooltip_text = "Hover your mouse over the text to see calculated caret position."
+      vg.text_box_bounds x, y, 150, tooltip_text, bounds
+
+      gx = ((mx - (bounds[0] + bounds[2]) * 0.5) / (bounds[0] - bounds[2])).abs
+      gy = ((my - (bounds[1] + bounds[3]) * 0.5) / (bounds[1] - bounds[3])).abs
+      a = [[[gx, gy].max - 0.5, 1].min, 0].max
+      vg.global_alpha a
+      vg.path do
+        vg.fill_color NVG.rgba(220, 220, 220, 255)
+        vg.rounded_rect bounds[0] - 2, bounds[1] - 2, (bounds[2] - bounds[0]).to_i + 4, (bounds[3] - bounds[1]).to_i + 4, 3
+        px = ((bounds[2] + bounds[0]) / 2).to_i
+        vg.move_to px, bounds[1] - 10
+        vg.line_to px + 7, bounds[1] + 1
+        vg.line_to px - 7, bounds[1] + 1
+        vg.fill
+      end
+      vg.fill_color NVG.rgba(0, 0, 0, 220)
+      vg.text_box x, y, 150, tooltip_text
+    end
   end
 
   def draw_graph(vg, x, y, w, h, t)
@@ -278,7 +364,7 @@ class GL2Demo
     vg.path do |nvg|
       nvg.move_to(sx[0], sy[0])
       1.upto(5) do |i|
-        nvg.bezier_to(sx[i - 1] * dx * 0.5, sy[i - 1], sx[i] - dx * 0.5, sy[i], sx[i], sy[i])
+        nvg.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1], sx[i] - dx * 0.5, sy[i], sx[i], sy[i])
       end
       nvg.line_to(x + w, y + h)
       nvg.line_to(x, y + h)
@@ -300,7 +386,7 @@ class GL2Demo
     vg.path do |nvg|
       nvg.move_to(sx[0], sy[0])
       1.upto(5) do |i|
-        nvg.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1], sx[i ]- dx * 0.5, sy[i], sx[i], sy[i])
+        nvg.bezier_to(sx[i - 1] + dx * 0.5, sy[i - 1], sx[i] - dx * 0.5, sy[i], sx[i], sy[i])
       end
       nvg.stroke_color(NVG.rgba(0, 160, 192, 255))
       nvg.stroke_width(3.0)
@@ -457,28 +543,28 @@ class GL2Demo
           fy = y - s * 0.5 + pad
 
           vg.line_cap(caps[i])
-          vg.line_join(joins[i])
+          vg.line_join(joins[j])
 
           vg.stroke_width(s * 0.3)
           vg.stroke_color(NVG.rgba(0, 0, 0, 160))
           vg.path do
             vg.move_to(fx + pts[0], fy + pts[1])
-            vg.move_to(fx + pts[2], fy + pts[3])
-            vg.move_to(fx + pts[4], fy + pts[5])
-            vg.move_to(fx + pts[6], fy + pts[7])
+            vg.line_to(fx + pts[2], fy + pts[3])
+            vg.line_to(fx + pts[4], fy + pts[5])
+            vg.line_to(fx + pts[6], fy + pts[7])
             vg.stroke
           end
 
           vg.line_cap(NVG::BUTT)
-          vg.line_cap(NVG::BEVEL)
+          vg.line_join(NVG::BEVEL)
 
           vg.stroke_width(1.0)
           vg.stroke_color(NVG.rgba(0, 192, 255, 255))
           vg.path do
             vg.move_to(fx + pts[0], fy + pts[1])
-            vg.move_to(fx + pts[2], fy + pts[3])
-            vg.move_to(fx + pts[4], fy + pts[5])
-            vg.move_to(fx + pts[6], fy + pts[7])
+            vg.line_to(fx + pts[2], fy + pts[3])
+            vg.line_to(fx + pts[4], fy + pts[5])
+            vg.line_to(fx + pts[6], fy + pts[7])
             vg.stroke
           end
         end
@@ -837,8 +923,137 @@ class GL2Demo
     end
   end
 
+  def draw_spinner(vg, cx, cy, r, t)
+    a0 = t * 6.0
+    a1 = Math::PI + t * 6
+    r0 = r
+    r1 = r * 0.75
+    vg.spork do
+      vg.begin_path
+        vg.arc(cx, cy, r0, a0, a1, NVG::CW)
+        vg.arc(cx, cy, r1, a1, a0, NVG::CCW)
+      vg.close_path
+      ax = cx + Math.cos(a0) * (r0 + r1) * 0.5
+      ay = cy + Math.sin(a0) * (r0 + r1) * 0.5
+      bx = cx + Math.cos(a1) * (r0 + r1) * 0.5
+      by = cy + Math.sin(a1) * (r0 + r1) * 0.5
+      paint = vg.linear_gradient ax, ay, bx, by, NVG.rgba(0,0,0,0), NVG.rgba(0,0,0,128)
+      vg.fill_paint paint
+      vg.fill
+    end
+  end
+
   def draw_thumbnails(vg, x, y, w, h, images, t)
+    ix,iy,iw,ih = nil, nil, nil, nil
     nimages = images.size
+    corner_radius = 3.0
+    thumb = 60.0
+    arry = 30.5
+    stackh = (nimages / 2) * (thumb + 10) + 10
+    u = (1 + Math.cos(t * 0.5)) * 0.5
+    u2 = (1 - Math.cos(t * 0.2)) * 0.5
+    vg.spork do
+      shadow_paint = vg.box_gradient(x, y + 4, w, h, corner_radius * 2, 20, NVG.rgba(0, 0, 0, 128), NVG.rgba(0, 0, 0, 0))
+      vg.path do
+        vg.rect x - 10, y - 10, w + 20, h + 30
+        vg.rounded_rect x, y, w, h, corner_radius
+        vg.path_winding NVG::HOLE
+        vg.fill_paint shadow_paint
+        vg.fill
+      end
+
+      vg.path do
+        vg.rounded_rect x, y, w, h, corner_radius
+        vg.move_to x - 10, y + arry
+        vg.line_to x + 1, y + arry - 11
+        vg.line_to x + 1, y + arry + 11
+        vg.fill_color NVG.rgba(200, 200, 200, 255)
+        vg.fill
+      end
+
+      vg.spork do
+        vg.scissor x, y, w, h
+        vg.translate 0, -(stackh - h) * u
+        dv = 1.0 / (nimages - 1).to_f
+        nimages.times do |i|
+          tx = x + 10
+          ty = y + 10
+          tx += (i % 2).to_i * (thumb + 10)
+          ty += (i / 2).to_i * (thumb + 10)
+          imgw, imgh = vg.image_size images[0]
+          if (imgw < imgh)
+            iw = thumb
+            ih = iw * imgh / imgw.to_f
+            ix = 0
+            iy = -(ih - thumb) * 0.5
+          else
+            ih = thumb
+            iw = ih * imgw / imgh.to_f
+            ix = -(iw - thumb) * 0.5
+            iy = 0
+          end
+          v = i * dv
+          a = [[(u2 - v) / dv, 0].max, 1].min
+          if a < 1.0
+            draw_spinner(vg, tx + thumb / 2, ty + thumb / 2, thumb * 0.25, t)
+          end
+
+          img_paint = vg.image_pattern(tx + ix, ty + iy, iw, ih, 0.0 / 180.0 * Math::PI, images[i], a)
+          vg.path do
+            vg.rounded_rect tx, ty, thumb, thumb, 5
+            vg.fill_paint img_paint
+            vg.fill
+          end
+          shadow_paint = vg.box_gradient tx - 1, ty, thumb + 2, thumb + 2, 5, 3, NVG.rgba(0, 0, 0, 128), NVG.rgba(0, 0, 0, 0)
+          vg.path do
+            vg.rect tx - 5, ty - 5, thumb + 10, thumb + 10
+            vg.rounded_rect tx, ty, thumb, thumb, 6
+            vg.path_winding NVG::HOLE
+            vg.fill_paint shadow_paint
+            vg.fill
+          end
+          vg.path do
+            vg.rounded_rect tx + 0.5, ty + 0.5, thumb - 1, thumb - 1, 4 - 0.5
+            vg.stroke_width 1.0
+            vg.stroke_color NVG.rgba(255, 255, 255, 192)
+            vg.stroke
+          end
+        end
+      end
+
+      fade_paint = vg.linear_gradient x, y, x, y + 6, NVG.rgba(200, 200, 200, 255), NVG.rgba(200, 200, 200, 0)
+      vg.path do
+        vg.path do
+          vg.rect x + 4, y, w - 8, 6
+          vg.fill_paint fade_paint
+          vg.fill
+        end
+      end
+
+      fade_paint = vg.linear_gradient x, y + h, x, y + h - 6, NVG.rgba(200, 200, 200, 255), NVG.rgba(200, 200, 200, 0)
+      vg.path do
+        vg.path do
+          vg.rect x + 4, y + h - 6, w - 8, 6
+          vg.fill_paint fade_paint
+          vg.fill
+        end
+      end
+
+      shadow_paint = vg.box_gradient(x + w - 12 + 1, y + 4 + 1, 8, h - 8, 3, 4, NVG.rgba(0, 0, 0, 32), NVG.rgba(0, 0, 0, 92))
+      vg.path do
+        vg.rounded_rect x + w - 12, y + 4, 8, h - 8, 3
+        vg.fill_paint shadow_paint
+        vg.fill
+      end
+
+      scrollh = (h / stackh) * (h - 8)
+      shadow_paint = vg.box_gradient(x + w - 12 - 1, y + 4 + (h - 8 - scrollh) * u - 1, 8, scrollh, 3, 4, NVG.rgba(220, 220, 220, 255), NVG.rgba(128, 128, 128, 255))
+      vg.path do
+        vg.rounded_rect x + w - 12 + 1, y + 4 + 1 + (h - 8 - scrollh) * u, 8 - 2, scrollh - 2, 2
+        vg.fill_paint shadow_paint
+        vg.fill
+      end
+    end
   end
 
   def render(vg, mx, my, width, height, t, blowup, data = nil)
@@ -920,7 +1135,7 @@ class GL2Demo
     #  self.errorcb(*args, &block)
     #end
 
-    window = GLFW::Window.new(1000, 600, 'mruby NanoVG', nil, nil)
+    window = GLFW::Window.new(1000, 600, 'mruby NanoVG')
 
     window.set_key_callback do |*args, &block|
       self.key(*args, &block)
