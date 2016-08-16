@@ -9,6 +9,7 @@
 #include "nvg_paint.h"
 #include "nvg_transform.h"
 #include "nvg_context.h"
+#include "nvg_impl.h"
 
 static mrb_value
 deg_to_rad(mrb_state *mrb, mrb_value klass)
@@ -54,6 +55,8 @@ mrb_mruby_nanovg_gem_init(mrb_state* mrb)
   mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GLES2"));
 #elif MRUBY_NANOVG_GLES3
   mrb_define_const(mrb, nvg_mod, "GL_IMPLEMENTATION", mrb_str_new_lit(mrb, "GLES3"));
+#else
+#  error mruby-nanovg: You forgot to set a MRUBY_NANOVG_GL define!
 #endif
 
   /* enum NVGwinding */
