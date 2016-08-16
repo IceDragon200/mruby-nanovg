@@ -1,3 +1,4 @@
+#include <string.h>
 #include <mruby.h>
 #include <mruby/class.h>
 #include <mruby/data.h>
@@ -470,6 +471,13 @@ DEFINE_FUNC_N1(context_font_face, nvgFontFace, "z", char*);
 DEFINE_FUNC_N3_f(context_text, nvgText_mrb, "ffz", mrb_float, mrb_float, char*);
 DEFINE_FUNC_N4(context_text_box, nvgTextBox_mrb, "fffz", mrb_float, mrb_float, mrb_float, char*);
 
+/**
+ * @param [Float] x
+ * @param [Float] y
+ * @param [String] str
+ * @param [Transform] t
+ * @return [Float]
+ */
 static mrb_value
 context_text_bounds(mrb_state *mrb, mrb_value self)
 {
@@ -498,21 +506,41 @@ context_text_box_bounds(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-/*static mrb_value
+static mrb_value
 context_text_glyph_positions(mrb_state *mrb, mrb_value self)
 {
   NVGcontext *context;
+  NVGglyphPosition glyphs[64];
   mrb_float x;
   mrb_float y;
+  mrb_value blk;
+  mrb_value argv[4];
   char *str;
+  char *start;
   char *end;
-  mrb_int positions;
-  mrb_int max_positions;
-  mrb_get_args(mrb, "ffzzd", &x, &y, &brw, &str, &end, &t, &mrb_nvg_transform_type);
+  int len;
+  int nglyphs;
+  int glyph_index;
+  mrb_get_args(mrb, "ffz&", &x, &y, &str, &blk);
+  start = str;
+  len = strlen(start);
+  end = start + len;
   context = get_context(mrb, self);
-  nvgTextGlyphPositions(context, x, y, string, end, positions, max_positions);
+  while (start < end) {
+    nglyphs = nvgTextGlyphPositions(context, x, y, start, end, glyphs, 64);
+    for (glyph_index = 0; glyph_index < nglyphs; ++glyph_index) {
+      NVGglyphPosition* glyph = &glyphs[glyph_index];
+      // index
+      argv[0] = mrb_fixnum_value(glyph->str - str);
+      argv[1] = mrb_float_value(mrb, glyph->x);
+      argv[2] = mrb_float_value(mrb, glyph->minx);
+      argv[3] = mrb_float_value(mrb, glyph->maxx);
+      mrb_yield_argv(mrb, blk, 4, argv);
+    }
+    start += nglyphs;
+  }
   return self;
-}*/
+}
 
 static mrb_value
 context_text_metrics(mrb_state *mrb, mrb_value self)
@@ -530,18 +558,38 @@ context_text_metrics(mrb_state *mrb, mrb_value self)
   return mrb_ary_new_from_values(mrb, 3, vals);
 }
 
+/**
+ * @yieldparam [String] string
+ * @yieldparam [Float] width
+ * @yieldparam [Float] minx
+ * @yieldparam [Float] miny
+ */
 static mrb_value
 context_text_break_lines(mrb_state *mrb, mrb_value self)
 {
-  //NVGcontext *context;
-  //char *str;
-  //char *end;
-  //mrb_int brw;
-  //NVGtextRow *rows;
-  //int max_rows;
-  //context = get_context(mrb, self);
-  //mrb_get_args(mrb, "z");
-  //return mrb_fixnum_value(nvgTextBreakLines(context, str, end, brw, rows, max_rows));
+  NVGtextRow rows[3];
+  NVGcontext *context;
+  int nrows;
+  int i;
+  char *start;
+  char *end;
+  mrb_float width;
+  mrb_value blk;
+  mrb_value argv[4];
+  mrb_get_args(mrb, "zf&", &start, &width, &blk);
+  end = start + strlen(start);
+  context = get_context(mrb, self);
+  while ((nrows = nvgTextBreakLines(context, start, end, width, rows, 3))) {
+    for (i = 0; i < nrows; i++) {
+      NVGtextRow* row = &rows[i];
+      argv[0] = mrb_str_new(mrb, row->start, (int)(row->end - row->start));
+      argv[1] = mrb_float_value(mrb, row->width);
+      argv[2] = mrb_float_value(mrb, row->minx);
+      argv[3] = mrb_float_value(mrb, row->maxx);
+      mrb_yield_argv(mrb, blk, 4, argv);
+    }
+    start = rows[nrows - 1].next;
+  }
   return mrb_fixnum_value(0);
 }
 
@@ -619,7 +667,7 @@ mrb_nvg_context_init(mrb_state *mrb, struct RClass *nvg_module)
   mrb_define_method(mrb, nvg_context_class, "text_bounds",         context_text_bounds,         MRB_ARGS_ARG(3, 1));
   mrb_define_method(mrb, nvg_context_class, "text_box_bounds",     context_text_box_bounds,     MRB_ARGS_ARG(4, 1));
 
-  /*mrb_define_method(mrb, nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));*/
+  mrb_define_method(mrb, nvg_context_class, "text_glyph_positions",context_text_glyph_positions,MRB_ARGS_REQ(6));
   mrb_define_method(mrb, nvg_context_class, "text_metrics",        context_text_metrics,        MRB_ARGS_NONE());
   mrb_define_method(mrb, nvg_context_class, "text_break_lines",    context_text_break_lines,    MRB_ARGS_REQ(5));
 }

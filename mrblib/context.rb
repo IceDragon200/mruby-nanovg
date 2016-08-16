@@ -118,6 +118,24 @@ module Nanovg
     end
     # @!endgroup State
 
+    alias :text_glyph_positions_yielded :text_glyph_positions
+
+    # @!group Text
+    # Returns a list of gylph positions
+    #
+    # @param [Float] x
+    # @param [Float] y
+    # @param [String] text
+    # @return [Array<Array[Float, Float, Float]>] (x, min_x, max_x)
+    def text_glyph_positions(x, y, text)
+      result = []
+      text_glyph_positions_yielded x, y, text do |_, x, min_x, max_x|
+        result << [x, min_x, max_x]
+      end
+      result
+    end
+    # @!endgroup text
+
     alias :fill_color= :fill_color
     alias :fill_paint= :fill_paint
     alias :font_blur= :font_blur
