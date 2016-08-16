@@ -49,14 +49,41 @@ transform_initialize(mrb_state *mrb, mrb_value self)
   t->d = d;
   t->e = e;
   t->f = f;
-  DATA_PTR(self) = t;
-  DATA_TYPE(self) = &mrb_nvg_transform_type;
+  mrb_data_init(self, t, &mrb_nvg_transform_type);
   return self;
 }
 
 static mrb_value
-transform_initialize_copy(mrb_state *mrb, mrb_value self)
+transform_initialize_copy(mrb_state* mrb, mrb_value self)
 {
+  return self;
+}
+
+static mrb_value
+transform_get_ref(mrb_state* mrb, mrb_value self)
+{
+  NVGtransform *transform;
+  mrb_int index;
+  mrb_get_args(mrb, "i", &index);
+  transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);
+  if (index < 0 || index >= 6) {
+    return mrb_float_value(mrb, 0.0);
+  }
+  return mrb_float_value(mrb, (mrb_float)transform->ary[index]);
+}
+
+static mrb_value
+transform_set_ref(mrb_state* mrb, mrb_value self)
+{
+  NVGtransform *transform;
+  mrb_int index;
+  mrb_float value;
+  mrb_get_args(mrb, "if", &index, &value);
+  transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);
+  if (index < 0 || index >= 6) {
+    return self;
+  }
+  transform->ary[index] = (float)value;
   return self;
 }
 
@@ -66,7 +93,7 @@ transform_get_ ## _name_(mrb_state *mrb, mrb_value self)                      \
 {                                                                             \
   NVGtransform *transform;                                                    \
   transform = mrb_data_get_ptr(mrb, self, &mrb_nvg_transform_type);           \
-  return mrb_float_value(mrb, transform->_name_);                             \
+  return mrb_float_value(mrb, (mrb_float)transform->_name_);                             \
 }
 
 #define ATTR_SET(_name_)                                                      \
@@ -194,6 +221,8 @@ mrb_nvg_transform_init(mrb_state *mrb, struct RClass *nvg_module)
 
   mrb_define_method(mrb, nvg_transform_class, "initialize",      transform_initialize,      MRB_ARGS_ANY());
   mrb_define_method(mrb, nvg_transform_class, "initialize_copy", transform_initialize_copy, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_transform_class, "[]",              transform_get_ref,         MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, nvg_transform_class, "[]=",             transform_set_ref,         MRB_ARGS_REQ(2));
   mrb_define_method(mrb, nvg_transform_class, "a",               transform_get_a,           MRB_ARGS_NONE());
   mrb_define_method(mrb, nvg_transform_class, "b",               transform_get_b,           MRB_ARGS_NONE());
   mrb_define_method(mrb, nvg_transform_class, "c",               transform_get_c,           MRB_ARGS_NONE());
