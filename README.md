@@ -32,6 +32,8 @@ end
 ## Requirements:
 In order to build and use the gem, the following gems are required
 
+* [mruby-idextmacros](https://github.com/IceDragon200/mruby-idextmacros)
+  Include this in your build_config include path, it has helper macros used by the gem for creating attribute fields and generic methods
 * [mruby-glew](http://github.com/IceDragon200/mruby-glew)
 * [mruby-gles](http://github.com/take-cheeze/mruby-gles)
 
